@@ -1,0 +1,118 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Snapshot Stability > manifest of all tool names + descriptions across all servers is stable 1`] = `
+{
+  "clocktower": [
+    {
+      "description": "Add a job definition to an existing croncall config file.",
+      "name": "clocktower_add_job",
+    },
+    {
+      "description": "Scaffold a croncall.config.ts file in the target project directory.",
+      "name": "clocktower_init",
+    },
+    {
+      "description": "List upcoming job runs parsed from a croncall config file.",
+      "name": "clocktower_schedule",
+    },
+  ],
+  "darkroom": [
+    {
+      "description": "Creates shutterbox.config.ts in a project directory. Scaffolds a starter config with thumbnail and hero image variants, breakpoints, and a .shutterbox-cache directory.",
+      "name": "darkroom_init",
+    },
+    {
+      "description": "Processes images in a directory using shutterbox image pipeline. Scans the directory for image files and returns processing instructions or results.",
+      "name": "darkroom_optimize",
+    },
+  ],
+  "flagpost": [
+    {
+      "description": "Adds a new feature flag definition to an existing flagpost.config.ts file.",
+      "name": "flagpost_add_flag",
+    },
+    {
+      "description": "Creates flagpost.config.ts in a project directory. Scaffolds a starter config with an example feature flag.",
+      "name": "flagpost_init",
+    },
+    {
+      "description": "Lists all feature flags defined in a flagpost.config.ts file, showing their names and default values.",
+      "name": "flagpost_list_flags",
+    },
+  ],
+  "floodgate": [
+    {
+      "description": "Adds a new rate limit rule to an existing floodgate.config.ts file.",
+      "name": "floodgate_add_rule",
+    },
+    {
+      "description": "Creates floodgate.config.ts in a project directory. Scaffolds a starter config with default rate limit rules for API and auth endpoints.",
+      "name": "floodgate_init",
+    },
+    {
+      "description": "Returns instructions for testing a specific rate limit rule locally.",
+      "name": "floodgate_test",
+    },
+  ],
+  "lockbox": [
+    {
+      "description": "Get (decrypt) a secret from the lockbox.",
+      "name": "lockbox_get",
+    },
+    {
+      "description": "Initialize lockbox in a project. Creates .vaultbox-key, .secrets/ directory, and updates .gitignore.",
+      "name": "lockbox_init",
+    },
+    {
+      "description": "List secret names (not values) stored in the lockbox.",
+      "name": "lockbox_list",
+    },
+    {
+      "description": "Set (encrypt and store) a secret in the lockbox.",
+      "name": "lockbox_set",
+    },
+  ],
+  "notifykit": [
+    {
+      "description": "Scaffolds a herald.config.ts in a project directory with provider configuration. Auto-detects Twilio and Resend if installed or env vars are set.",
+      "name": "herald_init",
+    },
+    {
+      "description": "Send a notification via notifykit. Returns instructions for configuring providers if the project is not yet set up.",
+      "name": "herald_send",
+    },
+    {
+      "description": "Generate a test notification code snippet for a specific channel. Returns ready-to-run code for testing your notifykit setup.",
+      "name": "herald_test",
+    },
+  ],
+  "sathergate-toolkit": [
+    {
+      "description": "Find package by use case",
+      "name": "find_package",
+    },
+    {
+      "description": "Get package details",
+      "name": "get_package",
+    },
+    {
+      "description": "List all packages",
+      "name": "list_packages",
+    },
+    {
+      "description": "Get quick start code",
+      "name": "quick_start",
+    },
+  ],
+  "searchcraft": [
+    {
+      "description": "Scaffolds a searchcraft.config.ts in a project directory with a starter search schema. Detects pressroom integration if present.",
+      "name": "sifter_init",
+    },
+    {
+      "description": "Search documents using the searchcraft engine. This is a demo tool that works with sample data to demonstrate BM25 scoring, fuzzy matching, and result ranking.",
+      "name": "sifter_search",
+    },
+  ],
+}
+`;
