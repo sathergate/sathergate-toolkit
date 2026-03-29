@@ -1,0 +1,18 @@
+{
+  "$schema": "https://registry.modelcontextprotocol.io/schema/server.json",
+  "name": "io.github.sathergate/lockbox",
+  "description": "Encrypted secrets for Next.js. AES-256-GCM with no vault needed.",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/sathergate/sathergate-toolkit",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "vaultbox",
+      "version": "0.1.0",
+      "transport": ["stdio"]
+    }
+  ]
+}

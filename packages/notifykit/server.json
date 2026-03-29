@@ -1,0 +1,18 @@
+{
+  "$schema": "https://registry.modelcontextprotocol.io/schema/server.json",
+  "name": "io.github.sathergate/notifykit",
+  "description": "Unified notifications for Next.js. Multi-provider SMS, email, and push.",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/sathergate/sathergate-toolkit",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "notifykit",
+      "version": "0.1.0",
+      "transport": ["stdio"]
+    }
+  ]
+}

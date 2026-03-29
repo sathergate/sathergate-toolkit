@@ -1,6 +1,7 @@
 {
   "name": "searchcraft",
   "version": "0.1.0",
+  "mcpName": "io.github.sathergate/searchcraft",
   "description": "Full-text search for Next.js. No external service.",
   "type": "module",
   "exports": {
@@ -10,7 +11,7 @@
     "./mcp": { "types": "./dist/mcp.d.ts", "import": "./dist/mcp.js" }
   },
   "bin": { "sifter": "./dist/cli.js" },
-  "files": ["dist"],
+  "files": ["dist", "server.json"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

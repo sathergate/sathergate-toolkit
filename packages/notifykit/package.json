@@ -1,6 +1,7 @@
 {
   "name": "notifykit",
   "version": "0.1.0",
+  "mcpName": "io.github.sathergate/notifykit",
   "description": "Unified notifications for Next.js. Any provider.",
   "type": "module",
   "exports": {
@@ -37,7 +38,8 @@
     "notifykit": "./dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "server.json"
   ],
   "scripts": {
     "build": "tsup",

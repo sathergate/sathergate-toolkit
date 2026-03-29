@@ -1,0 +1,18 @@
+{
+  "$schema": "https://registry.modelcontextprotocol.io/schema/server.json",
+  "name": "io.github.sathergate/darkroom",
+  "description": "Image processing pipeline for Next.js. Responsive optimization with Sharp.",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/sathergate/sathergate-toolkit",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "shutterbox",
+      "version": "0.1.0",
+      "transport": ["stdio"]
+    }
+  ]
+}
