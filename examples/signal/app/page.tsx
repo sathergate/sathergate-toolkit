@@ -8,15 +8,6 @@ import { FilterTabs } from "@/components/FilterTabs";
 import { SubmitModal } from "@/components/SubmitModal";
 import type { SignalItem, FilterTab } from "@/lib/types";
 
-function getOrCreateUserId(): string {
-  if (typeof sessionStorage === "undefined") return "user-demo";
-  const stored = sessionStorage.getItem("signal-uid");
-  if (stored) return stored;
-  const uid = `user-${Math.random().toString(36).slice(2, 9)}`;
-  sessionStorage.setItem("signal-uid", uid);
-  return uid;
-}
-
 export default function Home() {
   const [baseItems, setBaseItems] = useState<SignalItem[]>(SEED_DATA);
   const [searchResults, setSearchResults] = useState<SignalItem[] | null>(null);
@@ -24,15 +15,24 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
-  const [variant, setVariant] = useState<"compact" | "card">("compact");
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Evaluate flag once on mount
-  useEffect(() => {
-    const userId = getOrCreateUserId();
+  // Stable per-session userId — read synchronously so flag evaluation runs on
+  // first client render, not in an effect (avoids compact→card layout flash)
+  const [userId] = useState<string>(() => {
+    if (typeof sessionStorage === "undefined") return "user-demo";
+    const stored = sessionStorage.getItem("signal-uid");
+    if (stored) return stored;
+    const uid = `user-${Math.random().toString(36).slice(2, 9)}`;
+    sessionStorage.setItem("signal-uid", uid);
+    return uid;
+  });
+
+  const [variant] = useState<"compact" | "card">(() => {
     const flags = fp.evaluateAll({ userId });
-    if (flags.new_feed_layout) setVariant("card");
-  }, []);
+    return flags.new_feed_layout ? "card" : "compact";
+  });
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const doSearch = useCallback(async (q: string) => {
     if (!q.trim()) {
