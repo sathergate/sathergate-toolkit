@@ -1,6 +1,6 @@
 {
   "name": "searchcraft",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "mcpName": "io.github.sathergate/searchcraft",
   "description": "Full-text search for Next.js. No external service.",
   "type": "module",

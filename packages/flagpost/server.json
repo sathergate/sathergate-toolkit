@@ -2,7 +2,7 @@
   "$schema": "https://registry.modelcontextprotocol.io/schema/server.json",
   "name": "io.github.sathergate/flagpost",
   "description": "Feature flags for Next.js. One file, full control with A/B testing.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": {
     "url": "https://github.com/sathergate/sathergate-toolkit",
     "source": "github"
@@ -11,7 +11,7 @@
     {
       "registryType": "npm",
       "identifier": "flagpost",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "transport": ["stdio"]
     }
   ]

@@ -1,6 +1,6 @@
 {
   "name": "vaultbox",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "mcpName": "io.github.sathergate/lockbox",
   "description": "Encrypted secrets for Next.js. No vault needed.",
   "type": "module",
