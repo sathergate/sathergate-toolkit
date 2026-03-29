@@ -1,6 +1,7 @@
 {
   "name": "ratelimit-next",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "mcpName": "io.github.sathergate/floodgate",
   "description": "Rate limiting for Next.js. Zero dependencies.",
   "type": "module",
   "exports": {
@@ -32,9 +33,7 @@
   "bin": {
     "ratelimit-next": "./dist/cli.js"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist", "server.json"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

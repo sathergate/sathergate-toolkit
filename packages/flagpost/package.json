@@ -1,6 +1,7 @@
 {
   "name": "flagpost",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "mcpName": "io.github.sathergate/flagpost",
   "description": "Feature flags for Next.js. One file, full control.",
   "type": "module",
   "exports": {
@@ -25,7 +26,8 @@
     "flagpost": "./dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "server.json"
   ],
   "scripts": {
     "build": "tsup",

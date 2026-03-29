@@ -1,6 +1,7 @@
 {
   "name": "shutterbox",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "mcpName": "io.github.sathergate/darkroom",
   "description": "Image processing pipeline for Next.js.",
   "type": "module",
   "exports": {
@@ -24,9 +25,7 @@
   "bin": {
     "shutterbox": "./dist/cli.js"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist", "server.json"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

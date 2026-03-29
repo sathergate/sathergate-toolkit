@@ -1,0 +1,20 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.sathergate/searchcraft",
+  "description": "Full-text search for Next.js. BM25 scoring and fuzzy matching, no external service.",
+  "version": "0.1.1",
+  "repository": {
+    "url": "https://github.com/sathergate/sathergate-toolkit",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "searchcraft",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
