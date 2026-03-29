@@ -1,5 +1,5 @@
 {
-  "$schema": "https://registry.modelcontextprotocol.io/schema/server.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.sathergate/flagpost",
   "description": "Feature flags for Next.js. One file, full control with A/B testing.",
   "version": "0.1.1",
@@ -12,7 +12,9 @@
       "registryType": "npm",
       "identifier": "flagpost",
       "version": "0.1.1",
-      "transport": "stdio"
+      "transport": {
+        "type": "stdio"
+      }
     }
   ]
 }

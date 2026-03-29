@@ -1,5 +1,5 @@
 {
-  "$schema": "https://registry.modelcontextprotocol.io/schema/server.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.sathergate/searchcraft",
   "description": "Full-text search for Next.js. BM25 scoring and fuzzy matching, no external service.",
   "version": "0.1.1",
@@ -12,7 +12,9 @@
       "registryType": "npm",
       "identifier": "searchcraft",
       "version": "0.1.1",
-      "transport": "stdio"
+      "transport": {
+        "type": "stdio"
+      }
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://registry.modelcontextprotocol.io/schema/server.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.sathergate/floodgate",
   "description": "Rate limiting for Next.js. Zero-dependency sliding window and token bucket.",
   "version": "0.1.1",
@@ -12,7 +12,9 @@
       "registryType": "npm",
       "identifier": "ratelimit-next",
       "version": "0.1.1",
-      "transport": "stdio"
+      "transport": {
+        "type": "stdio"
+      }
     }
   ]
 }

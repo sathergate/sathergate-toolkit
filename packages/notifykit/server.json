@@ -1,5 +1,5 @@
 {
-  "$schema": "https://registry.modelcontextprotocol.io/schema/server.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.sathergate/notifykit",
   "description": "Unified notifications for Next.js. Multi-provider SMS, email, and push.",
   "version": "0.1.0",
@@ -12,7 +12,9 @@
       "registryType": "npm",
       "identifier": "@sathergate/notifykit",
       "version": "0.1.0",
-      "transport": "stdio"
+      "transport": {
+        "type": "stdio"
+      }
     }
   ]
 }
