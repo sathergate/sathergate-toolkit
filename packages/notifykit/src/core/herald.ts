@@ -47,7 +47,16 @@ export function createHerald(config: HeraldConfig): Herald {
   async function sendBatch(
     notifications: Notification[],
   ): Promise<SendResult[]> {
-    return Promise.all(notifications.map(send));
+    const settled = await Promise.allSettled(notifications.map(send));
+    return settled.map((result, i) =>
+      result.status === "fulfilled"
+        ? result.value
+        : {
+            success: false as const,
+            channel: notifications[i]!.channel,
+            error: result.reason instanceof Error ? result.reason.message : String(result.reason),
+          },
+    );
   }
 
   async function notify(

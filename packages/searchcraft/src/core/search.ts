@@ -5,10 +5,9 @@ import type {
   SearchResult,
   MatchInfo,
   ResolvedField,
-  PostingEntry,
 } from "./types.js";
-import { tokenize, stem } from "./tokenizer.js";
-import { resolveSchema } from "./index-builder.js";
+import { tokenize } from "./tokenizer.js";
+import { resolveSchema, getFieldValue } from "./index-builder.js";
 
 /** BM25 parameters. */
 const K1 = 1.2;
@@ -16,6 +15,7 @@ const B = 0.75;
 
 /**
  * Compute Levenshtein edit distance between two strings.
+ * Uses two-row DP to avoid allocating a full matrix.
  * Returns early if distance exceeds maxDist.
  */
 function levenshtein(a: string, b: string, maxDist: number): number {
@@ -23,30 +23,29 @@ function levenshtein(a: string, b: string, maxDist: number): number {
 
   const m = a.length;
   const n = b.length;
-  const dp: number[][] = [];
 
-  for (let i = 0; i <= m; i++) {
-    dp[i] = [i];
-  }
-  for (let j = 0; j <= n; j++) {
-    dp[0]![j] = j;
-  }
+  let prev = new Array<number>(n + 1);
+  let curr = new Array<number>(n + 1);
+
+  for (let j = 0; j <= n; j++) prev[j] = j;
 
   for (let i = 1; i <= m; i++) {
-    let rowMin = Infinity;
+    curr[0] = i;
+    let rowMin = i;
     for (let j = 1; j <= n; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[i]![j] = Math.min(
-        dp[i - 1]![j]! + 1,
-        dp[i]![j - 1]! + 1,
-        dp[i - 1]![j - 1]! + cost,
+      curr[j] = Math.min(
+        prev[j]! + 1,
+        curr[j - 1]! + 1,
+        prev[j - 1]! + cost,
       );
-      rowMin = Math.min(rowMin, dp[i]![j]!);
+      if (curr[j]! < rowMin) rowMin = curr[j]!;
     }
     if (rowMin > maxDist) return maxDist + 1;
+    [prev, curr] = [curr, prev];
   }
 
-  return dp[m]![n]!;
+  return prev[n]!;
 }
 
 /**
@@ -59,7 +58,10 @@ function fuzzyTerms(
   maxDist: number,
 ): string[] {
   const matches: string[] = [];
+  const minLen = term.length - maxDist;
+  const maxLen = term.length + maxDist;
   for (const indexTerm of index.keys()) {
+    if (indexTerm.length < minLen || indexTerm.length > maxLen) continue;
     if (levenshtein(term, indexTerm, maxDist) <= maxDist) {
       matches.push(indexTerm);
     }
@@ -67,39 +69,7 @@ function fuzzyTerms(
   return matches;
 }
 
-/**
- * Compute the average document length across all fields.
- */
-function computeAvgDocLength<T>(
-  documents: T[],
-  fields: ResolvedField[],
-): number {
-  if (documents.length === 0) return 0;
-  let totalTokens = 0;
-  for (const doc of documents) {
-    for (const field of fields) {
-      const val = getFieldValue(doc, field.name);
-      if (val) {
-        totalTokens += tokenize(val).length;
-      }
-    }
-  }
-  return totalTokens / documents.length;
-}
-
-function getFieldValue(doc: unknown, fieldName: string): string {
-  const parts = fieldName.split(".");
-  let current: unknown = doc;
-  for (const part of parts) {
-    if (current == null || typeof current !== "object") return "";
-    current = (current as Record<string, unknown>)[part];
-  }
-  if (current == null) return "";
-  if (Array.isArray(current)) return current.join(" ");
-  return String(current);
-}
-
-/** Compute per-document token count for BM25 normalization. */
+/** Compute per-document token count for BM25 normalization (fallback path). */
 function docLength<T>(doc: T, fields: ResolvedField[]): number {
   let len = 0;
   for (const field of fields) {
@@ -107,6 +77,12 @@ function docLength<T>(doc: T, fields: ResolvedField[]): number {
     if (val) len += tokenize(val).length;
   }
   return len;
+}
+
+/** Pre-computed index metadata for BM25 scoring. */
+export interface IndexMetadata {
+  docLengths: Map<number, number>;
+  avgDocLength: number;
 }
 
 /**
@@ -119,6 +95,7 @@ export function search<T>(
   schema: SchemaDefinition,
   query: string,
   options: SearchOptions = {},
+  metadata?: IndexMetadata,
 ): SearchResult<T>[] {
   const {
     limit = 10,
@@ -134,7 +111,23 @@ export function search<T>(
   if (queryTokens.length === 0) return [];
 
   const N = documents.length;
-  const avgDl = computeAvgDocLength(documents, fields);
+
+  // Use pre-computed metadata when available, otherwise compute once upfront
+  let precomputedLengths: Map<number, number>;
+  let avgDl: number;
+  if (metadata) {
+    precomputedLengths = metadata.docLengths;
+    avgDl = metadata.avgDocLength;
+  } else {
+    precomputedLengths = new Map<number, number>();
+    let total = 0;
+    for (let i = 0; i < documents.length; i++) {
+      const len = docLength(documents[i]!, fields);
+      precomputedLengths.set(i, len);
+      total += len;
+    }
+    avgDl = documents.length > 0 ? total / documents.length : 0;
+  }
 
   // For each query term, collect the set of matching doc indices
   // and compute per-term BM25 contribution.
@@ -168,7 +161,7 @@ export function search<T>(
       for (const [docIdx, entries] of postings) {
         termDocSet.add(docIdx);
 
-        const dl = docLength(documents[docIdx]!, fields);
+        const dl = precomputedLengths.get(docIdx) ?? 0;
 
         // Sum TF across all fields with weighting
         let weightedTf = 0;

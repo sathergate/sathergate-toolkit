@@ -108,11 +108,12 @@ export function parseCron(expression: string): ParsedCron {
 
 /**
  * Check if a cron expression matches a given date (to the minute).
- * @param expression - Cron expression
+ * Accepts either a cron expression string or a pre-parsed ParsedCron.
+ * @param expressionOrParsed - Cron expression string or ParsedCron
  * @param date - Date to check against
  */
-export function matchesCron(expression: string, date: Date): boolean {
-  const cron = parseCron(expression);
+export function matchesCron(expressionOrParsed: string | ParsedCron, date: Date): boolean {
+  const cron = typeof expressionOrParsed === "string" ? parseCron(expressionOrParsed) : expressionOrParsed;
   return (
     cron.minutes.has(date.getUTCMinutes()) &&
     cron.hours.has(date.getUTCHours()) &&
@@ -124,12 +125,13 @@ export function matchesCron(expression: string, date: Date): boolean {
 
 /**
  * Calculate the next time a cron expression will match, after the given date.
- * @param expression - Cron expression
+ * Accepts either a cron expression string or a pre-parsed ParsedCron.
+ * @param expressionOrParsed - Cron expression string or ParsedCron
  * @param after - Start searching after this date (default: now)
  * @returns The next Date the cron will fire
  */
-export function nextRun(expression: string, after?: Date): Date {
-  const cron = parseCron(expression);
+export function nextRun(expressionOrParsed: string | ParsedCron, after?: Date): Date {
+  const cron = typeof expressionOrParsed === "string" ? parseCron(expressionOrParsed) : expressionOrParsed;
   const start = after ? new Date(after.getTime()) : new Date();
 
   // Advance to the next minute boundary
@@ -173,5 +175,5 @@ export function nextRun(expression: string, after?: Date): Date {
     return candidate;
   }
 
-  throw new Error(`No matching time found for cron expression "${expression}" within 4 years`);
+  throw new Error(`No matching time found for cron expression "${expressionOrParsed}" within 4 years`);
 }

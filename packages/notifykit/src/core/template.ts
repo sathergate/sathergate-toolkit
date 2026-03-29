@@ -1,5 +1,7 @@
 import type { TemplateDefinition } from "./types.js";
 
+const TEMPLATE_REGEX = /\{\{(\w+)\}\}/g;
+
 /**
  * Replace {{key}} placeholders in a template string with values from data.
  * Unknown placeholders are left as-is.
@@ -8,7 +10,7 @@ export function renderTemplate(
   template: string,
   data: Record<string, string>,
 ): string {
-  return template.replace(/\{\{(\w+)\}\}/g, (match, key: string) => {
+  return template.replace(TEMPLATE_REGEX, (match, key: string) => {
     return key in data ? data[key] : match;
   });
 }

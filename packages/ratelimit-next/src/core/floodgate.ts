@@ -5,7 +5,7 @@ import type {
 } from "./types.js";
 import { RateLimitError } from "./types.js";
 import { MemoryStore } from "./store.js";
-import { fixedWindow, slidingWindow, tokenBucket } from "./algorithms.js";
+import { fixedWindow, slidingWindow, tokenBucket, parseWindow } from "./algorithms.js";
 
 export interface Floodgate {
   /** Check a rate limit rule without blocking. Returns the result. */
@@ -34,6 +34,12 @@ export interface Floodgate {
 export function createFloodgate(config: FloodgateConfig): Floodgate {
   const store = config.store ?? new MemoryStore();
 
+  // Pre-parse window durations to avoid regex per check
+  const parsedWindows = new Map<string, number>();
+  for (const [name, rule] of Object.entries(config.rules)) {
+    parsedWindows.set(name, parseWindow(rule.window));
+  }
+
   function getRule(ruleName: string) {
     const rule = config.rules[ruleName];
     if (!rule) {
@@ -51,14 +57,15 @@ export function createFloodgate(config: FloodgateConfig): Floodgate {
     const rule = getRule(ruleName);
     const algorithm = rule.algorithm ?? "sliding-window";
     const fullKey = `${ruleName}:${key}`;
+    const windowMs = parsedWindows.get(ruleName)!;
 
     switch (algorithm) {
       case "fixed-window":
-        return fixedWindow(store, fullKey, rule);
+        return fixedWindow(store, fullKey, rule, windowMs);
       case "sliding-window":
-        return slidingWindow(store, fullKey, rule);
+        return slidingWindow(store, fullKey, rule, windowMs);
       case "token-bucket":
-        return tokenBucket(store, fullKey, rule);
+        return tokenBucket(store, fullKey, rule, windowMs);
       default:
         throw new Error(`Unknown algorithm "${algorithm}".`);
     }

@@ -83,8 +83,8 @@ export async function processImage(
   const sharp = await loadSharp();
   let image = sharp(input);
 
-  // Get input metadata so we can fall back on the original format
-  const inputMeta = await sharp(input).metadata();
+  // Get input metadata from a clone so we don't consume the pipeline
+  const inputMeta = await image.clone().metadata();
 
   // Separate quality transforms — they need special handling
   let lastQuality: number | undefined;
@@ -111,14 +111,13 @@ export async function processImage(
   }
   image = image.toFormat(format, formatOptions);
 
-  const buffer = await image.toBuffer();
-  const meta = await sharp(buffer).metadata();
+  const { data: buffer, info } = await image.toBuffer({ resolveWithObject: true });
 
   return {
     buffer,
     format,
-    width: meta.width ?? 0,
-    height: meta.height ?? 0,
+    width: info.width ?? 0,
+    height: info.height ?? 0,
     size: buffer.byteLength,
   };
 }

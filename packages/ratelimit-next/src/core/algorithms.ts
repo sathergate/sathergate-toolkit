@@ -33,9 +33,10 @@ export function parseWindow(window: string): number {
 export async function fixedWindow(
   store: Store,
   key: string,
-  config: RateLimitConfig
+  config: RateLimitConfig,
+  precomputedWindowMs?: number,
 ): Promise<RateLimitResult> {
-  const windowMs = parseWindow(config.window);
+  const windowMs = precomputedWindowMs ?? parseWindow(config.window);
   const now = Date.now();
   const windowStart = Math.floor(now / windowMs) * windowMs;
   const windowEnd = windowStart + windowMs;
@@ -46,13 +47,9 @@ export async function fixedWindow(
   const remaining = Math.max(0, config.limit - count);
   const reset = windowEnd;
 
-  return {
-    allowed,
-    limit: config.limit,
-    remaining,
-    reset,
-    ...(allowed ? {} : { retryAfter: Math.ceil((reset - now) / 1000) }),
-  };
+  const result: RateLimitResult = { allowed, limit: config.limit, remaining, reset };
+  if (!allowed) result.retryAfter = Math.ceil((reset - now) / 1000);
+  return result;
 }
 
 /**
@@ -63,9 +60,10 @@ export async function fixedWindow(
 export async function slidingWindow(
   store: Store,
   key: string,
-  config: RateLimitConfig
+  config: RateLimitConfig,
+  precomputedWindowMs?: number,
 ): Promise<RateLimitResult> {
-  const windowMs = parseWindow(config.window);
+  const windowMs = precomputedWindowMs ?? parseWindow(config.window);
   const now = Date.now();
   const currentWindowStart = Math.floor(now / windowMs) * windowMs;
   const previousWindowStart = currentWindowStart - windowMs;
@@ -89,13 +87,9 @@ export async function slidingWindow(
   const remaining = Math.max(0, Math.floor(config.limit - estimatedCount));
   const reset = currentWindowStart + windowMs;
 
-  return {
-    allowed,
-    limit: config.limit,
-    remaining,
-    reset,
-    ...(allowed ? {} : { retryAfter: Math.ceil((reset - now) / 1000) }),
-  };
+  const result: RateLimitResult = { allowed, limit: config.limit, remaining, reset };
+  if (!allowed) result.retryAfter = Math.ceil((reset - now) / 1000);
+  return result;
 }
 
 /**
@@ -106,9 +100,10 @@ export async function slidingWindow(
 export async function tokenBucket(
   store: Store,
   key: string,
-  config: RateLimitConfig
+  config: RateLimitConfig,
+  precomputedWindowMs?: number,
 ): Promise<RateLimitResult> {
-  const windowMs = parseWindow(config.window);
+  const windowMs = precomputedWindowMs ?? parseWindow(config.window);
   const now = Date.now();
   const bucketKey = `tb:${key}:bucket`;
   const tsKey = `tb:${key}:ts`;
@@ -147,11 +142,7 @@ export async function tokenBucket(
   const timeUntilToken = allowed ? 0 : Math.ceil((1 - tokens) / refillRate);
   const reset = now + Math.ceil((config.limit - newTokens) / refillRate);
 
-  return {
-    allowed,
-    limit: config.limit,
-    remaining,
-    reset,
-    ...(allowed ? {} : { retryAfter: Math.ceil(timeUntilToken / 1000) }),
-  };
+  const result: RateLimitResult = { allowed, limit: config.limit, remaining, reset };
+  if (!allowed) result.retryAfter = Math.ceil(timeUntilToken / 1000);
+  return result;
 }

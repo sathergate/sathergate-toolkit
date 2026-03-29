@@ -1,4 +1,4 @@
-import { parseCron, matchesCron, nextRun } from "./cron.js";
+import { parseCron, matchesCron, nextRun, type ParsedCron } from "./cron.js";
 import type {
   ClockTower,
   ClockTowerConfig,
@@ -70,10 +70,11 @@ export function createClockTower<T extends JobRegistry>(
 ): ClockTower<T> {
   const jobNames = Object.keys(config.jobs) as Array<keyof T & string>;
 
-  // Validate all cron expressions eagerly
+  // Validate and cache all parsed cron expressions eagerly
+  const parsedCrons = new Map<string, ParsedCron>();
   for (const name of jobNames) {
     try {
-      parseCron(config.jobs[name].schedule);
+      parsedCrons.set(name, parseCron(config.jobs[name].schedule));
     } catch (err) {
       throw new Error(
         `Invalid cron expression for job "${name}": ${(err as Error).message}`,
@@ -132,7 +133,7 @@ export function createClockTower<T extends JobRegistry>(
     const results = new Map<string, JobResult>();
 
     const dueJobs = jobNames.filter((name) =>
-      matchesCron(config.jobs[name].schedule, checkTime),
+      matchesCron(parsedCrons.get(name)!, checkTime),
     );
 
     const entries = await Promise.allSettled(
@@ -156,13 +157,13 @@ export function createClockTower<T extends JobRegistry>(
     if (!job) {
       throw new Error(`Unknown job: "${jobName}"`);
     }
-    return nextRun(job.schedule);
+    return nextRun(parsedCrons.get(jobName)!);
   }
 
   function getSchedule(): ScheduleEntry[] {
     return jobNames.map((name) => ({
       jobName: name,
-      nextRun: nextRun(config.jobs[name].schedule),
+      nextRun: nextRun(parsedCrons.get(name)!),
       schedule: config.jobs[name].schedule,
       description: config.jobs[name].description,
     }));
