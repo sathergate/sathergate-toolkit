@@ -91,6 +91,7 @@
       "name": "sathergate-toolkit",
       "repo": "https://github.com/sathergate/sathergate-toolkit",
       "packages": [
+        "gatehouse",
         "shutterbox",
         "flagpost",
         "ratelimit-next",

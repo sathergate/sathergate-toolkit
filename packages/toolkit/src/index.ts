@@ -3,6 +3,7 @@
  * @see https://github.com/sathergate/sathergate-toolkit
  */
 export const packages = {
+  gatehouse: { name: "gatehouse", description: "Drop-in RBAC for Next.js", install: "npm install gatehouse", exports: [".", "./react", "./next", "./adapters/clerk", "./adapters/supabase", "./adapters/authjs"], category: "authorization" },
   shutterbox: { name: "shutterbox", description: "Image processing pipeline for Next.js", install: "npm install shutterbox sharp", exports: [".", "./react", "./next", "./mcp"], category: "image-processing" },
   flagpost: { name: "flagpost", description: "Feature flags for Next.js", install: "npm install flagpost", exports: [".", "./react", "./next", "./mcp"], category: "feature-flags" },
   "ratelimit-next": { name: "ratelimit-next", description: "Rate limiting for Next.js", install: "npm install ratelimit-next", exports: [".", "./react", "./next", "./adapters/redis", "./adapters/vercel-kv", "./mcp"], category: "rate-limiting" },

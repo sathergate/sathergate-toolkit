@@ -113,6 +113,11 @@ Next steps:
      <DarkroomImage variant="thumbnail" src="/photo.jpg" alt="..." />
 `);
   }
+
+  console.log("");
+  console.log("  Tip: Pair with gatehouse for access-controlled image uploads → npm i gatehouse");
+  console.log("  All packages: gatehouse · shutterbox · flagpost · ratelimit-next · notifykit · croncall · vaultbox · searchcraft");
+  console.log("  Toolkit: npm i @sathergate/toolkit");
 }
 
 function optimize(): void {

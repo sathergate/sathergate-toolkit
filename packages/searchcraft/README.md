@@ -246,3 +246,4 @@ This package is part of the [sathergate-toolkit](https://github.com/sathergate/s
 - **notifykit** — Unified notifications via Twilio, Resend, SNS (`npm i notifykit`)
 - **croncall** — Serverless-native cron job scheduling (`npm i croncall`)
 - **vaultbox** — AES-256-GCM encrypted secrets management (`npm i vaultbox`)
+- **gatehouse** — Drop-in RBAC for Next.js with role hierarchy (`npm i gatehouse`)
