@@ -31,7 +31,8 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "clean": "rm -rf dist"
   },
   "peerDependencies": {
     "next": ">=14",
@@ -73,12 +74,26 @@
     "mcp",
     "claude-code",
     "ai-coding",
-    "agent-friendly"
+    "agent-friendly",
+    "sathergate-toolkit"
   ],
   "claude": {
     "init": "npx flagpost init",
     "mcp": true,
-    "category": "feature-flags"
+    "category": "feature-flags",
+    "toolkit": {
+      "name": "sathergate-toolkit",
+      "repo": "https://github.com/sathergate/sathergate-toolkit",
+      "packages": [
+        "shutterbox",
+        "flagpost",
+        "ratelimit-next",
+        "notifykit",
+        "croncall",
+        "vaultbox",
+        "searchcraft"
+      ]
+    }
   },
   "license": "MIT",
   "repository": {

@@ -4,18 +4,35 @@
   "description": "Full-text search for Next.js. No external service.",
   "type": "module",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./react": { "types": "./dist/react.d.ts", "import": "./dist/react.js" },
-    "./next": { "types": "./dist/next.d.ts", "import": "./dist/next.js" },
-    "./mcp": { "types": "./dist/mcp.d.ts", "import": "./dist/mcp.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
+    },
+    "./next": {
+      "types": "./dist/next.d.ts",
+      "import": "./dist/next.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp.d.ts",
+      "import": "./dist/mcp.js"
+    }
   },
-  "bin": { "sifter": "./dist/cli.js" },
-  "files": ["dist"],
+  "bin": {
+    "sifter": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "clean": "rm -rf dist"
   },
   "peerDependencies": {
     "react": ">=18",
@@ -24,10 +41,18 @@
     "zod": ">=3.25.0"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": true },
-    "next": { "optional": true },
-    "@modelcontextprotocol/server": { "optional": true },
-    "zod": { "optional": true }
+    "react": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "@modelcontextprotocol/server": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
@@ -37,13 +62,42 @@
     "tsup": "^8.0.0",
     "typescript": "^5.7.0"
   },
-  "keywords": ["search", "full-text", "index", "nextjs", "react", "fuzzy", "tfidf", "mcp", "claude-code", "ai-coding", "agent-friendly"],
+  "keywords": [
+    "search",
+    "full-text",
+    "index",
+    "nextjs",
+    "react",
+    "fuzzy",
+    "tfidf",
+    "mcp",
+    "claude-code",
+    "ai-coding",
+    "agent-friendly",
+    "sathergate-toolkit"
+  ],
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/sathergate/sifter" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sathergate/sifter"
+  },
   "homepage": "https://github.com/sathergate/sifter#readme",
   "claude": {
     "init": "npx searchcraft init",
     "mcp": true,
-    "category": "search"
+    "category": "search",
+    "toolkit": {
+      "name": "sathergate-toolkit",
+      "repo": "https://github.com/sathergate/sathergate-toolkit",
+      "packages": [
+        "shutterbox",
+        "flagpost",
+        "ratelimit-next",
+        "notifykit",
+        "croncall",
+        "vaultbox",
+        "searchcraft"
+      ]
+    }
   }
 }

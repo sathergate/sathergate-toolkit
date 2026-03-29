@@ -1,7 +1,7 @@
 {
-  "name": "vaultbox",
+  "name": "@sathergate/toolkit",
   "version": "0.1.0",
-  "description": "Encrypted secrets for Next.js. No vault needed.",
+  "description": "Agent-native infrastructure toolkit for Next.js.",
   "type": "module",
   "exports": {
     ".": {
@@ -13,9 +13,6 @@
       "import": "./dist/mcp.js"
     }
   },
-  "bin": {
-    "vaultbox": "./dist/cli.js"
-  },
   "files": [
     "dist"
   ],
@@ -23,29 +20,8 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build",
     "clean": "rm -rf dist"
   },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "tsup": "^8.0.0",
-    "typescript": "^5.7.0"
-  },
-  "keywords": [
-    "secrets",
-    "encryption",
-    "env",
-    "environment",
-    "vault",
-    "config",
-    "dotenv",
-    "security",
-    "mcp",
-    "claude-code",
-    "ai-coding",
-    "agent-friendly",
-    "sathergate-toolkit"
-  ],
   "peerDependencies": {
     "@modelcontextprotocol/server": ">=1.0.0",
     "zod": ">=3.25.0"
@@ -58,13 +34,23 @@
       "optional": true
     }
   },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0"
+  },
+  "keywords": [
+    "nextjs",
+    "toolkit",
+    "agent-friendly",
+    "mcp",
+    "claude-code",
+    "sathergate-toolkit"
+  ],
   "claude": {
-    "init": "npx vaultbox init",
     "mcp": true,
-    "category": "secrets-management",
+    "category": "toolkit",
     "toolkit": {
       "name": "sathergate-toolkit",
-      "repo": "https://github.com/sathergate/sathergate-toolkit",
       "packages": [
         "shutterbox",
         "flagpost",
@@ -79,7 +65,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sathergate/lockbox"
-  },
-  "homepage": "https://github.com/sathergate/lockbox#readme"
+    "url": "https://github.com/sathergate/sathergate-toolkit"
+  }
 }
