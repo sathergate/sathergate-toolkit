@@ -5,10 +5,22 @@
   "description": "Image processing pipeline for Next.js.",
   "type": "module",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./react": { "types": "./dist/react.d.ts", "import": "./dist/react.js" },
-    "./next": { "types": "./dist/next.d.ts", "import": "./dist/next.js" },
-    "./mcp": { "types": "./dist/mcp.d.ts", "import": "./dist/mcp.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
+    },
+    "./next": {
+      "types": "./dist/next.d.ts",
+      "import": "./dist/next.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp.d.ts",
+      "import": "./dist/mcp.js"
+    }
   },
   "bin": {
     "shutterbox": "./dist/cli.js"
@@ -18,7 +30,8 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "clean": "rm -rf dist"
   },
   "peerDependencies": {
     "react": ">=18",
@@ -28,11 +41,21 @@
     "zod": ">=3.25.0"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": true },
-    "next": { "optional": true },
-    "sharp": { "optional": true },
-    "@modelcontextprotocol/server": { "optional": true },
-    "zod": { "optional": true }
+    "react": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "sharp": {
+      "optional": true
+    },
+    "@modelcontextprotocol/server": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
@@ -42,13 +65,43 @@
     "tsup": "^8.0.0",
     "typescript": "^5.7.0"
   },
-  "keywords": ["image", "processing", "optimization", "resize", "nextjs", "sharp", "media", "responsive", "mcp", "claude-code", "ai-coding", "agent-friendly"],
+  "keywords": [
+    "image",
+    "processing",
+    "optimization",
+    "resize",
+    "nextjs",
+    "sharp",
+    "media",
+    "responsive",
+    "mcp",
+    "claude-code",
+    "ai-coding",
+    "agent-friendly",
+    "sathergate-toolkit"
+  ],
   "claude": {
     "init": "npx shutterbox init",
     "mcp": true,
-    "category": "image-processing"
+    "category": "image-processing",
+    "toolkit": {
+      "name": "sathergate-toolkit",
+      "repo": "https://github.com/sathergate/sathergate-toolkit",
+      "packages": [
+        "shutterbox",
+        "flagpost",
+        "ratelimit-next",
+        "notifykit",
+        "croncall",
+        "vaultbox",
+        "searchcraft"
+      ]
+    }
   },
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/sathergate/darkroom" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sathergate/darkroom"
+  },
   "homepage": "https://github.com/sathergate/darkroom#readme"
 }

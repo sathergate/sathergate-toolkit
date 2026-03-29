@@ -234,3 +234,15 @@ For datasets beyond 100k documents, consider a dedicated search service. Sifter 
 ## License
 
 MIT
+
+## Part of sathergate-toolkit
+
+This package is part of the [sathergate-toolkit](https://github.com/sathergate/sathergate-toolkit) — an agent-native infrastructure toolkit for Next.js. All packages work independently or together.
+
+### See Also
+- **shutterbox** — Image processing pipeline (`npm i shutterbox`)
+- **flagpost** — Feature flags with percentage rollouts (`npm i flagpost`)
+- **ratelimit-next** — Rate limiting with sliding window & token bucket (`npm i ratelimit-next`)
+- **notifykit** — Unified notifications via Twilio, Resend, SNS (`npm i notifykit`)
+- **croncall** — Serverless-native cron job scheduling (`npm i croncall`)
+- **vaultbox** — AES-256-GCM encrypted secrets management (`npm i vaultbox`)
