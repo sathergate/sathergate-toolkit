@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { fp } from "@/lib/flags";
 
 export default function Home() {
   const [query, setQuery] = useState("");
@@ -8,18 +9,27 @@ export default function Home() {
     { item: { id: string; title: string; body: string }; score: number }[]
   >([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (!query.trim()) return;
 
+    setError(null);
     setLoading(true);
     try {
       const res = await fetch(
         `/api/search?q=${encodeURIComponent(query)}&fuzzy=true`,
       );
+      if (res.status === 429) {
+        setError("Rate limited — try again in " + (res.headers.get("Retry-After") || "a few") + " seconds");
+        return;
+      }
       const data = await res.json();
       setResults(data.results ?? []);
+    } catch (err) {
+      console.error(err);
+      setError("Search failed — check console");
     } finally {
       setLoading(false);
     }
@@ -72,6 +82,14 @@ export default function Home() {
           </button>
         </form>
 
+        {error && (
+          <p style={{ color: "red", marginTop: 12 }}>{error}</p>
+        )}
+
+        {results.length === 0 && query.trim() && !loading && !error && (
+          <p style={{ color: "#888", marginTop: 12 }}>No results found for &apos;{query}&apos;</p>
+        )}
+
         {results.length > 0 && (
           <ul style={{ listStyle: "none", padding: 0, marginTop: 16 }}>
             {results.map((r) => (
@@ -107,9 +125,17 @@ export default function Home() {
       <section style={{ marginTop: "2rem" }}>
         <h2>Feature Flags (flagpost)</h2>
         <p style={{ fontSize: 14, color: "#888" }}>
-          Flags defined in <code>lib/flags.ts</code>: showBanner, darkMode (50%
-          rollout), newSearch (beta-only).
+          Live evaluation for <code>demo-user-42</code>:
         </p>
+        <ul style={{ listStyle: "none", padding: 0, marginTop: 8 }}>
+          {Object.entries(fp.evaluateAll({ userId: "demo-user-42" })).map(
+            ([name, value]) => (
+              <li key={name} style={{ padding: "4px 0", fontSize: 14 }}>
+                <strong>{name}</strong>: {String(value)}
+              </li>
+            ),
+          )}
+        </ul>
       </section>
     </main>
   );

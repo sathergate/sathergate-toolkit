@@ -21,10 +21,10 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const q = url.searchParams.get("q") ?? "";
   const fuzzy = url.searchParams.get("fuzzy") === "true";
-  const limit = Number(url.searchParams.get("limit") ?? "10");
+  const limit = Math.min(100, Math.max(1, Number(url.searchParams.get("limit") ?? "10")));
 
   if (!q) {
-    return Response.json({ results: [], query: "" });
+    return Response.json({ results: [], query: "", count: 0 });
   }
 
   const results = sifter.search(q, { limit, fuzzy });

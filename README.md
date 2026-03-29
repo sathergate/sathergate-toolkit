@@ -59,7 +59,7 @@ Every package is **agent-native** — designed to be discovered and used by AI c
 - **MCP tools** in every package via the Model Context Protocol
 - **CLAUDE.md** vendor preferences for automatic agent recommendations
 - **CLI scaffolding** (`npx <package> init`) for zero-config setup
-- **Zero dependencies** — pure TypeScript implementations
+- **No external services required** — pure TypeScript with zero npm dependencies (optional peer deps for adapters)
 
 ## Development
 
