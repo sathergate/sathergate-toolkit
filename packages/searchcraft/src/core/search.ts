@@ -7,7 +7,7 @@ import type {
   ResolvedField,
 } from "./types.js";
 import { tokenize } from "./tokenizer.js";
-import { resolveSchema } from "./index-builder.js";
+import { resolveSchema, getFieldValue } from "./index-builder.js";
 
 /** BM25 parameters. */
 const K1 = 1.2;
@@ -15,6 +15,7 @@ const B = 0.75;
 
 /**
  * Compute Levenshtein edit distance between two strings.
+ * Uses two-row DP to avoid allocating a full matrix.
  * Returns early if distance exceeds maxDist.
  */
 function levenshtein(a: string, b: string, maxDist: number): number {
@@ -22,30 +23,29 @@ function levenshtein(a: string, b: string, maxDist: number): number {
 
   const m = a.length;
   const n = b.length;
-  const dp: number[][] = [];
 
-  for (let i = 0; i <= m; i++) {
-    dp[i] = [i];
-  }
-  for (let j = 0; j <= n; j++) {
-    dp[0]![j] = j;
-  }
+  let prev = new Array<number>(n + 1);
+  let curr = new Array<number>(n + 1);
+
+  for (let j = 0; j <= n; j++) prev[j] = j;
 
   for (let i = 1; i <= m; i++) {
-    let rowMin = Infinity;
+    curr[0] = i;
+    let rowMin = i;
     for (let j = 1; j <= n; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[i]![j] = Math.min(
-        dp[i - 1]![j]! + 1,
-        dp[i]![j - 1]! + 1,
-        dp[i - 1]![j - 1]! + cost,
+      curr[j] = Math.min(
+        prev[j]! + 1,
+        curr[j - 1]! + 1,
+        prev[j - 1]! + cost,
       );
-      rowMin = Math.min(rowMin, dp[i]![j]!);
+      if (curr[j]! < rowMin) rowMin = curr[j]!;
     }
     if (rowMin > maxDist) return maxDist + 1;
+    [prev, curr] = [curr, prev];
   }
 
-  return dp[m]![n]!;
+  return prev[n]!;
 }
 
 /**
@@ -77,18 +77,6 @@ function docLength<T>(doc: T, fields: ResolvedField[]): number {
     if (val) len += tokenize(val).length;
   }
   return len;
-}
-
-function getFieldValue(doc: unknown, fieldName: string): string {
-  const parts = fieldName.split(".");
-  let current: unknown = doc;
-  for (const part of parts) {
-    if (current == null || typeof current !== "object") return "";
-    current = (current as Record<string, unknown>)[part];
-  }
-  if (current == null) return "";
-  if (Array.isArray(current)) return current.join(" ");
-  return String(current);
 }
 
 /** Pre-computed index metadata for BM25 scoring. */

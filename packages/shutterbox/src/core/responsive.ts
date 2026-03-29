@@ -54,6 +54,7 @@ export async function generateResponsiveSet(
   options: ResponsiveOptions = {},
 ): Promise<ResponsiveSet> {
   const breakpoints = options.breakpoints ?? DEFAULT_BREAKPOINTS;
+  const sortedBreakpoints = [...breakpoints].sort((a, b) => a - b);
   const formats = options.formats ?? DEFAULT_FORMATS;
   const quality = options.quality ?? 80;
   const basePipeline = options.basePipeline ?? [];
@@ -111,9 +112,8 @@ export async function generateResponsiveSet(
   }));
 
   // Build default sizes attribute
-  const sorted = [...breakpoints].sort((a, b) => a - b);
-  const sizesParts = sorted.map((bp) => `(max-width: ${bp}px) ${bp}px`);
-  sizesParts.push(`${sorted[sorted.length - 1]}px`);
+  const sizesParts = sortedBreakpoints.map((bp) => `(max-width: ${bp}px) ${bp}px`);
+  sizesParts.push(`${sortedBreakpoints[sortedBreakpoints.length - 1]}px`);
 
   // Fallback srcset uses the last format (usually jpeg)
   const fallbackFormat = formats[formats.length - 1]!;

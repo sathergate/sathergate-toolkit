@@ -26,7 +26,7 @@ export function resolveSchema(schema: SchemaDefinition): ResolvedField[] {
 }
 
 /** Extract the value of a (possibly nested) field from a document. */
-function getFieldValue(doc: unknown, fieldName: string): string {
+export function getFieldValue(doc: unknown, fieldName: string): string {
   const parts = fieldName.split(".");
   let current: unknown = doc;
   for (const part of parts) {
@@ -111,9 +111,4 @@ export function buildIndex<T>(
   }
 
   return { index, docLengths, totalTokens };
-}
-
-/** Count total documents in the corpus. */
-export function documentCount<T>(documents: T[]): number {
-  return documents.length;
 }
