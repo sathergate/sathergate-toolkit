@@ -33,6 +33,8 @@ export function SubmitModal({ onClose, onSuccess }: SubmitModalProps) {
         return;
       }
 
+      if (!res.ok) return;
+
       const item: SignalItem = await res.json();
       onSuccess(item);
       onClose();
