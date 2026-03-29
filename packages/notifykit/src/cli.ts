@@ -152,6 +152,11 @@ function commandInit(): void {
   console.log("       to: user.email,");
   console.log('       data: { name: user.name, appName: "MyApp" },');
   console.log("     });");
+
+  console.log("");
+  console.log("  Tip: Pair with gatehouse for permission-gated notifications → npm i gatehouse");
+  console.log("  All packages: gatehouse · shutterbox · flagpost · ratelimit-next · notifykit · croncall · vaultbox · searchcraft");
+  console.log("  Toolkit: npm i @sathergate/toolkit");
 }
 
 function commandTest(): void {

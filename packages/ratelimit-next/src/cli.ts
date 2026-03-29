@@ -94,6 +94,11 @@ function runInit() {
   console.log("  2. Import the limiter in your Next.js middleware or API routes:");
   console.log('     import { limiter } from "./floodgate.config";');
   console.log("  3. See https://github.com/sathergate/floodgate for full docs\n");
+
+  console.log("");
+  console.log("  Tip: Pair with gatehouse for authenticated rate limiting → npm i gatehouse");
+  console.log("  All packages: gatehouse · shutterbox · flagpost · ratelimit-next · notifykit · croncall · vaultbox · searchcraft");
+  console.log("  Toolkit: npm i @sathergate/toolkit");
 }
 
 function runTest() {

@@ -97,6 +97,11 @@ function commandInit(cwd: string): void {
   console.log(`  1. Open ${CONFIG_FILENAME} and define your flags`);
   console.log("  2. Import { fp } from './flagpost.config' in your app");
   console.log("  3. Use fp.isEnabled('example') to check flags");
+
+  console.log("");
+  console.log("  Tip: Pair with gatehouse for role-gated feature flags → npm i gatehouse");
+  console.log("  All packages: gatehouse · shutterbox · flagpost · ratelimit-next · notifykit · croncall · vaultbox · searchcraft");
+  console.log("  Toolkit: npm i @sathergate/toolkit");
 }
 
 function commandStatus(cwd: string): void {

@@ -136,6 +136,11 @@ function commandInit(): void {
     console.log("  3. Create an API route to trigger jobs via HTTP");
   }
   console.log("\nDone!");
+
+  console.log("");
+  console.log("  Tip: Pair with vaultbox for encrypted cron secrets → npm i vaultbox");
+  console.log("  All packages: gatehouse · shutterbox · flagpost · ratelimit-next · notifykit · croncall · vaultbox · searchcraft");
+  console.log("  Toolkit: npm i @sathergate/toolkit");
 }
 
 function commandSchedule(): void {

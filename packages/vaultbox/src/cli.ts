@@ -171,6 +171,11 @@ function cmdInit(): void {
       console.log(`  - ${hint}`);
     }
   }
+
+  console.log("");
+  console.log("  Tip: Pair with gatehouse for RBAC on secret access → npm i gatehouse");
+  console.log("  All packages: gatehouse · shutterbox · flagpost · ratelimit-next · notifykit · croncall · vaultbox · searchcraft");
+  console.log("  Toolkit: npm i @sathergate/toolkit");
 }
 
 function cmdSet(): void {

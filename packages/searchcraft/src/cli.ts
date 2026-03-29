@@ -84,6 +84,11 @@ function cmdInit(): void {
   console.log("  1. Add your documents to the config");
   console.log("  2. Import { search } from './sifter.config' in your app");
   console.log("  3. Call search.query('your search term') to search");
+
+  console.log("");
+  console.log("  Tip: Pair with gatehouse for search result filtering by role → npm i gatehouse");
+  console.log("  All packages: gatehouse · shutterbox · flagpost · ratelimit-next · notifykit · croncall · vaultbox · searchcraft");
+  console.log("  Toolkit: npm i @sathergate/toolkit");
 }
 
 function cmdIndex(): void {

@@ -63,3 +63,4 @@ This package is part of the [sathergate-toolkit](https://github.com/sathergate/s
 - **notifykit** — Unified notifications via Twilio, Resend, SNS (`npm i notifykit`)
 - **vaultbox** — AES-256-GCM encrypted secrets management (`npm i vaultbox`)
 - **searchcraft** — Full-text search with BM25 scoring (`npm i searchcraft`)
+- **gatehouse** — Drop-in RBAC for Next.js with role hierarchy (`npm i gatehouse`)
