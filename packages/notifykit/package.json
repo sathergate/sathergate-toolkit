@@ -1,0 +1,102 @@
+{
+  "name": "notifykit",
+  "version": "0.1.0",
+  "description": "Unified notifications for Next.js. Any provider.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
+    },
+    "./next": {
+      "types": "./dist/next.d.ts",
+      "import": "./dist/next.js"
+    },
+    "./adapters/twilio": {
+      "types": "./dist/adapters/twilio.d.ts",
+      "import": "./dist/adapters/twilio.js"
+    },
+    "./adapters/sns": {
+      "types": "./dist/adapters/sns.d.ts",
+      "import": "./dist/adapters/sns.js"
+    },
+    "./adapters/resend": {
+      "types": "./dist/adapters/resend.d.ts",
+      "import": "./dist/adapters/resend.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp.d.ts",
+      "import": "./dist/mcp.js"
+    }
+  },
+  "bin": {
+    "notifykit": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "next": ">=14",
+    "react": ">=18",
+    "@modelcontextprotocol/server": ">=1.0.0",
+    "zod": ">=3.25.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "@modelcontextprotocol/server": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@aws-sdk/client-sns": "^3.1017.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0"
+  },
+  "keywords": [
+    "notifications",
+    "sms",
+    "push",
+    "email",
+    "twilio",
+    "sns",
+    "nextjs",
+    "messaging",
+    "mcp",
+    "claude-code",
+    "ai-coding",
+    "agent-friendly"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sathergate/herald"
+  },
+  "homepage": "https://github.com/sathergate/herald#readme",
+  "claude": {
+    "init": "npx notifykit init",
+    "mcp": true,
+    "category": "notifications"
+  }
+}

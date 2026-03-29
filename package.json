@@ -1,0 +1,25 @@
+{
+  "name": "sathergate-toolkit",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "npm@10.9.4",
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/server": "file:stubs/modelcontextprotocol-server",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "turbo": "^2.8.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0",
+    "zod": "^3.25.0"
+  }
+}

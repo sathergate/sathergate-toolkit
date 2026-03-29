@@ -1,0 +1,46 @@
+{
+  "name": "croncall",
+  "version": "0.1.0",
+  "description": "Cron jobs for Next.js. Serverless-native.",
+  "type": "module",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./next": { "types": "./dist/next.d.ts", "import": "./dist/next.js" },
+    "./mcp": { "types": "./dist/mcp.d.ts", "import": "./dist/mcp.js" }
+  },
+  "bin": {
+    "croncall": "./dist/cli.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "next": ">=14",
+    "@modelcontextprotocol/server": ">=1.0.0",
+    "zod": ">=3.25.0"
+  },
+  "peerDependenciesMeta": {
+    "next": { "optional": true },
+    "@modelcontextprotocol/server": { "optional": true },
+    "zod": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "next": "^15.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0"
+  },
+  "keywords": ["cron", "scheduler", "jobs", "tasks", "nextjs", "serverless", "vercel-cron", "scheduled", "mcp", "claude-code", "ai-coding", "agent-friendly"],
+  "claude": {
+    "init": "npx croncall init",
+    "mcp": true,
+    "category": "scheduled-tasks"
+  },
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/sathergate/clocktower" },
+  "homepage": "https://github.com/sathergate/clocktower#readme"
+}
