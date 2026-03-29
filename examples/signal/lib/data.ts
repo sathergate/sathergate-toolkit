@@ -24,7 +24,7 @@ export const SEED_DATA: SignalItem[] = [
     tags: ["rate-limiting", "api", "next.js"],
     votes: 612,
     comments: 18,
-    submittedAt: new Date(Date.now() - 2 * 24 * 3_600_000).toISOString(),
+    submittedAt: new Date(Date.now() - 8 * 3_600_000).toISOString(),
     trendingScore: 0,
     source: "npmjs.com",
   },
