@@ -1,6 +1,8 @@
 export { createSifter } from "./sifter.js";
-export { buildIndex, resolveSchema } from "./index-builder.js";
+export { buildIndex, indexDocument, resolveSchema } from "./index-builder.js";
+export type { IndexResult } from "./index-builder.js";
 export { search } from "./search.js";
+export type { IndexMetadata } from "./search.js";
 export { tokenize, stem, STOPWORDS } from "./tokenizer.js";
 export type {
   FieldDefinition,

@@ -1,6 +1,29 @@
 import type { ImageFormat, Pipeline, ProcessedImage, ResponsiveSet, ResponsiveSource } from "./types.js";
 import { processImage } from "./processor.js";
 
+/** Run async tasks with a concurrency limit. */
+async function runWithConcurrency<T>(
+  tasks: (() => Promise<T>)[],
+  concurrency: number,
+): Promise<T[]> {
+  const results: T[] = new Array(tasks.length);
+  let nextIdx = 0;
+
+  async function worker(): Promise<void> {
+    while (nextIdx < tasks.length) {
+      const idx = nextIdx++;
+      results[idx] = await tasks[idx]!();
+    }
+  }
+
+  const workers = Array.from(
+    { length: Math.min(concurrency, tasks.length) },
+    () => worker(),
+  );
+  await Promise.all(workers);
+  return results;
+}
+
 /** Default breakpoints if none are provided. */
 const DEFAULT_BREAKPOINTS = [640, 768, 1024, 1280, 1536];
 
@@ -39,8 +62,8 @@ export async function generateResponsiveSet(
   const images = new Map<string, ProcessedImage>();
   const sourcesByFormat = new Map<ImageFormat, string[]>();
 
-  // Process every breakpoint x format combination
-  const tasks: Promise<void>[] = [];
+  // Process every breakpoint x format combination with bounded concurrency
+  const taskFns: (() => Promise<void>)[] = [];
 
   for (const fmt of formats) {
     sourcesByFormat.set(fmt, []);
@@ -52,18 +75,17 @@ export async function generateResponsiveSet(
         { type: "quality", quality },
       ];
 
-      tasks.push(
-        processImage(input, pipeline).then((result) => {
-          const key = `${width}_${fmt}`;
-          images.set(key, result);
-          const url = urlFor(width, fmt);
-          sourcesByFormat.get(fmt)!.push(`${url} ${width}w`);
-        }),
-      );
+      taskFns.push(async () => {
+        const result = await processImage(input, pipeline);
+        const key = `${width}_${fmt}`;
+        images.set(key, result);
+        const url = urlFor(width, fmt);
+        sourcesByFormat.get(fmt)!.push(`${url} ${width}w`);
+      });
     }
   }
 
-  await Promise.all(tasks);
+  await runWithConcurrency(taskFns, 3);
 
   // Sort srcset entries by width
   for (const entries of sourcesByFormat.values()) {

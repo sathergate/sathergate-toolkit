@@ -6,7 +6,7 @@ import type {
   InvertedIndex,
   SchemaDefinition,
 } from "./types.js";
-import { buildIndex } from "./index-builder.js";
+import { buildIndex, indexDocument, resolveSchema } from "./index-builder.js";
 import { search } from "./search.js";
 
 /**
@@ -23,27 +23,42 @@ import { search } from "./search.js";
  */
 export function createSifter<T>(config: SifterConfig<T>): Sifter<T> {
   const { schema } = config;
+  const fields = resolveSchema(schema);
   let documents: T[] = [...config.documents];
-  let index: InvertedIndex = buildIndex(documents, schema);
+
+  let { index, docLengths, totalTokens } = buildIndex(documents, schema);
+
+  function rebuildFull(): void {
+    const result = buildIndex(documents, schema);
+    index = result.index;
+    docLengths = result.docLengths;
+    totalTokens = result.totalTokens;
+  }
 
   return {
     search(query: string, options?: SearchOptions): SearchResult<T>[] {
-      return search(index, documents, schema, query, options);
+      const avgDl = documents.length > 0 ? totalTokens / documents.length : 0;
+      return search(index, documents, schema, query, options, {
+        docLengths,
+        avgDocLength: avgDl,
+      });
     },
 
     add(document: T): void {
+      const docIdx = documents.length;
       documents.push(document);
-      // Rebuild index to include new document
-      index = buildIndex(documents, schema);
+      const tokenCount = indexDocument(index, document, docIdx, fields);
+      docLengths.set(docIdx, tokenCount);
+      totalTokens += tokenCount;
     },
 
     remove(predicate: (item: T) => boolean): void {
       documents = documents.filter((doc) => !predicate(doc));
-      index = buildIndex(documents, schema);
+      rebuildFull();
     },
 
     rebuild(): void {
-      index = buildIndex(documents, schema);
+      rebuildFull();
     },
 
     get size(): number {

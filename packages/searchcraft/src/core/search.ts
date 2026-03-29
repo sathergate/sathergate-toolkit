@@ -59,7 +59,10 @@ function fuzzyTerms(
   maxDist: number,
 ): string[] {
   const matches: string[] = [];
+  const minLen = term.length - maxDist;
+  const maxLen = term.length + maxDist;
   for (const indexTerm of index.keys()) {
+    if (indexTerm.length < minLen || indexTerm.length > maxLen) continue;
     if (levenshtein(term, indexTerm, maxDist) <= maxDist) {
       matches.push(indexTerm);
     }
@@ -109,6 +112,12 @@ function docLength<T>(doc: T, fields: ResolvedField[]): number {
   return len;
 }
 
+/** Pre-computed index metadata for BM25 scoring. */
+export interface IndexMetadata {
+  docLengths: Map<number, number>;
+  avgDocLength: number;
+}
+
 /**
  * Search the inverted index with BM25 scoring.
  * Multi-term AND semantics: all query terms must match a document.
@@ -119,6 +128,7 @@ export function search<T>(
   schema: SchemaDefinition,
   query: string,
   options: SearchOptions = {},
+  metadata?: IndexMetadata,
 ): SearchResult<T>[] {
   const {
     limit = 10,
@@ -134,7 +144,23 @@ export function search<T>(
   if (queryTokens.length === 0) return [];
 
   const N = documents.length;
-  const avgDl = computeAvgDocLength(documents, fields);
+
+  // Use pre-computed metadata when available, otherwise compute once upfront
+  let precomputedLengths: Map<number, number>;
+  let avgDl: number;
+  if (metadata) {
+    precomputedLengths = metadata.docLengths;
+    avgDl = metadata.avgDocLength;
+  } else {
+    precomputedLengths = new Map<number, number>();
+    let total = 0;
+    for (let i = 0; i < documents.length; i++) {
+      const len = docLength(documents[i]!, fields);
+      precomputedLengths.set(i, len);
+      total += len;
+    }
+    avgDl = documents.length > 0 ? total / documents.length : 0;
+  }
 
   // For each query term, collect the set of matching doc indices
   // and compute per-term BM25 contribution.
@@ -168,7 +194,7 @@ export function search<T>(
       for (const [docIdx, entries] of postings) {
         termDocSet.add(docIdx);
 
-        const dl = docLength(documents[docIdx]!, fields);
+        const dl = precomputedLengths.get(docIdx) ?? 0;
 
         // Sum TF across all fields with weighting
         let weightedTf = 0;
