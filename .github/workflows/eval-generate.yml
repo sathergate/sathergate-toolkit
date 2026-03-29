@@ -1,0 +1,50 @@
+name: Generate Eval Data
+
+on:
+  schedule:
+    # Weekly on Sunday at 00:00 UTC
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+jobs:
+  generate-evals:
+    name: Generate Eval Dataset
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run tests with eval collection
+        run: EVAL_COLLECT=1 npx vitest run --reporter=verbose
+        continue-on-error: false
+
+      - name: Upload eval artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-data-${{ github.run_id }}
+          path: eval-output/
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Summarize eval output
+        run: |
+          echo "## Eval Data Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -d eval-output ]; then
+            for f in eval-output/*.jsonl; do
+              if [ -f "$f" ]; then
+                count=$(wc -l < "$f")
+                basename=$(basename "$f")
+                avg_score=$(awk -F'"score":' '{split($2,a,","); if(a[1]+0>0) {sum+=a[1]; n++}} END {if(n>0) printf "%.2f", sum/n; else print "N/A"}' "$f")
+                echo "- **$basename**: $count records, avg score: $avg_score" >> $GITHUB_STEP_SUMMARY
+              fi
+            done
+          else
+            echo "No eval output generated." >> $GITHUB_STEP_SUMMARY
+          fi

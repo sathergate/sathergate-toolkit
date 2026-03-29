@@ -5,3 +5,5 @@ dist
 .shutterbox-cache
 .secrets
 .lockbox-key
+.vaultbox-key
+eval-output
