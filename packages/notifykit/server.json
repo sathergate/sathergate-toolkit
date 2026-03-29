@@ -10,7 +10,7 @@
   "packages": [
     {
       "registryType": "npm",
-      "identifier": "notifykit",
+      "identifier": "@sathergate/notifykit",
       "version": "0.1.0",
       "transport": ["stdio"]
     }

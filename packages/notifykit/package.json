@@ -1,5 +1,5 @@
 {
-  "name": "notifykit",
+  "name": "@sathergate/notifykit",
   "version": "0.1.0",
   "mcpName": "io.github.sathergate/notifykit",
   "description": "Unified notifications for Next.js. Any provider.",
