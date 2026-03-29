@@ -5,9 +5,8 @@ import type {
   SearchResult,
   MatchInfo,
   ResolvedField,
-  PostingEntry,
 } from "./types.js";
-import { tokenize, stem } from "./tokenizer.js";
+import { tokenize } from "./tokenizer.js";
 import { resolveSchema } from "./index-builder.js";
 
 /** BM25 parameters. */
@@ -70,24 +69,14 @@ function fuzzyTerms(
   return matches;
 }
 
-/**
- * Compute the average document length across all fields.
- */
-function computeAvgDocLength<T>(
-  documents: T[],
-  fields: ResolvedField[],
-): number {
-  if (documents.length === 0) return 0;
-  let totalTokens = 0;
-  for (const doc of documents) {
-    for (const field of fields) {
-      const val = getFieldValue(doc, field.name);
-      if (val) {
-        totalTokens += tokenize(val).length;
-      }
-    }
+/** Compute per-document token count for BM25 normalization (fallback path). */
+function docLength<T>(doc: T, fields: ResolvedField[]): number {
+  let len = 0;
+  for (const field of fields) {
+    const val = getFieldValue(doc, field.name);
+    if (val) len += tokenize(val).length;
   }
-  return totalTokens / documents.length;
+  return len;
 }
 
 function getFieldValue(doc: unknown, fieldName: string): string {
@@ -100,16 +89,6 @@ function getFieldValue(doc: unknown, fieldName: string): string {
   if (current == null) return "";
   if (Array.isArray(current)) return current.join(" ");
   return String(current);
-}
-
-/** Compute per-document token count for BM25 normalization. */
-function docLength<T>(doc: T, fields: ResolvedField[]): number {
-  let len = 0;
-  for (const field of fields) {
-    const val = getFieldValue(doc, field.name);
-    if (val) len += tokenize(val).length;
-  }
-  return len;
 }
 
 /** Pre-computed index metadata for BM25 scoring. */
