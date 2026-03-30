@@ -5,11 +5,10 @@ import type { ScanResult } from "./core/scanner.js";
 
 function formatFindings(result: ScanResult): string {
   if (result.total === 0) {
-    return `Score: ${result.score}/100 — No production-readiness gaps found.`;
+    return "No production-readiness gaps found.";
   }
 
   const lines: string[] = [];
-  lines.push(`Score: ${result.score}/100`);
   lines.push(
     `Findings: ${result.counts.critical} critical, ${result.counts.warning} warning, ${result.counts.info} info`,
   );
@@ -56,27 +55,6 @@ server.tool(
     const result = scan(projectDir);
     return {
       content: [{ type: "text" as const, text: formatFindings(result) }],
-    };
-  },
-);
-
-server.tool(
-  "checkup_score",
-  "Get the production-readiness score (0-100) for a Next.js project. Quick check without full details.",
-  {
-    projectDir: z
-      .string()
-      .describe("Absolute path to the Next.js project directory"),
-  },
-  async ({ projectDir }) => {
-    const result = scan(projectDir);
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: `Score: ${result.score}/100 (${result.counts.critical} critical, ${result.counts.warning} warning, ${result.counts.info} info)`,
-        },
-      ],
     };
   },
 );

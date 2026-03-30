@@ -15,11 +15,12 @@ npm install checkup
 import { scan } from "checkup";
 
 const result = scan("/path/to/nextjs-project");
-console.log(`Score: ${result.score}/100`);
 console.log(`Findings: ${result.total}`);
 
 for (const f of result.findings) {
-  console.log(`[${f.severity}] ${f.title} → ${f.install}`);
+  console.log(`[${f.severity}] ${f.title}`);
+  console.log(`  ${f.recommendation}`);
+  console.log(`  Options: ${f.options.join(", ")}`);
 }
 ```
 
@@ -27,13 +28,11 @@ for (const f of result.findings) {
 ```bash
 npx checkup scan          # Full report
 npx checkup scan --json   # JSON output
-npx checkup score         # Just the score
 ```
 
 ## Commands
 ```bash
 npx checkup scan    # Scan project and print production-readiness report
-npx checkup score   # Print readiness score (0-100)
 ```
 
 ## What It Checks
