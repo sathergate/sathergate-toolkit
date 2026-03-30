@@ -18,6 +18,8 @@ export interface Floodgate {
   headers(result: RateLimitResult): Record<string, string>;
   /** Access the underlying store (useful for cleanup). */
   readonly store: Store;
+  /** The configured rules, keyed by rule name. */
+  readonly rules: FloodgateConfig["rules"];
 }
 
 /**
@@ -73,6 +75,7 @@ export function createFloodgate(config: FloodgateConfig): Floodgate {
 
   return {
     store,
+    rules: config.rules,
 
     async check(ruleName: string, key = "global"): Promise<RateLimitResult> {
       return runAlgorithm(ruleName, key);
