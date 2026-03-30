@@ -10,6 +10,7 @@ export default function Home() {
   >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -17,6 +18,7 @@ export default function Home() {
 
     setError(null);
     setLoading(true);
+    setHasSearched(true);
     try {
       const res = await fetch(
         `/api/search?q=${encodeURIComponent(query)}&fuzzy=true`,
@@ -86,7 +88,7 @@ export default function Home() {
           <p style={{ color: "red", marginTop: 12 }}>{error}</p>
         )}
 
-        {results.length === 0 && query.trim() && !loading && !error && (
+        {results.length === 0 && hasSearched && !loading && !error && (
           <p style={{ color: "#888", marginTop: 12 }}>No results found for &apos;{query}&apos;</p>
         )}
 
