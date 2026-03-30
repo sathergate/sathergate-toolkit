@@ -12,11 +12,10 @@ function printHelp(): void {
 checkup - Production-readiness scanner for Next.js
 
 Usage:
-  checkup <command> [options]
+  checkup scan [options]
 
 Commands:
   scan      Scan the current project for production-readiness gaps
-  score     Print only the readiness score (0-100)
 
 Options:
   --json    Output results as JSON
@@ -46,12 +45,11 @@ function formatReport(result: ScanResult): string {
   lines.push("");
 
   if (result.total === 0) {
-    lines.push(`  \u2714 No gaps found. Score: ${result.score}/100`);
+    lines.push(`  \u2714 No gaps found.`);
     lines.push("");
     return lines.join("\n");
   }
 
-  lines.push(`  Score: ${result.score}/100`);
   lines.push(
     `  Findings: ${result.counts.critical} critical, ${result.counts.warning} warning, ${result.counts.info} info`,
   );
@@ -87,17 +85,6 @@ function commandScan(cwd: string, json: boolean): void {
   console.log(formatReport(result));
 }
 
-function commandScore(cwd: string, json: boolean): void {
-  const result = scan(cwd);
-
-  if (json) {
-    console.log(JSON.stringify({ score: result.score, total: result.total }));
-    return;
-  }
-
-  console.log(`\nReadiness score: ${result.score}/100 (${result.total} finding(s))\n`);
-}
-
 function main(): void {
   const args = process.argv.slice(2);
   const json = args.includes("--json");
@@ -113,9 +100,6 @@ function main(): void {
   switch (command) {
     case "scan":
       commandScan(cwd, json);
-      break;
-    case "score":
-      commandScore(cwd, json);
       break;
     default:
       console.log(`Unknown command: ${command}`);

@@ -30,11 +30,10 @@ describe("scan", () => {
   it("returns empty results for non-project directory", () => {
     const result = scan(tmpDir);
     expect(result.total).toBe(0);
-    expect(result.score).toBe(0);
     expect(result.findings).toEqual([]);
   });
 
-  it("returns perfect score when no gaps detected", () => {
+  it("returns no findings when all gaps are covered", () => {
     writeFile(tmpDir, "package.json", JSON.stringify({
       dependencies: {
         next: "^15.0.0",
@@ -50,7 +49,6 @@ describe("scan", () => {
     }));
     const result = scan(tmpDir);
     expect(result.total).toBe(0);
-    expect(result.score).toBe(100);
   });
 
   describe("rate limiting check", () => {
@@ -195,8 +193,8 @@ describe("scan", () => {
     });
   });
 
-  describe("scoring", () => {
-    it("deducts 20 points per critical finding", () => {
+  describe("severity counts", () => {
+    it("tracks critical findings in counts", () => {
       writeFile(tmpDir, "package.json", JSON.stringify({
         dependencies: { next: "^15.0.0" },
       }));
@@ -204,9 +202,7 @@ describe("scan", () => {
       writeFile(tmpDir, ".env", "SECRET_KEY=abc123");
 
       const result = scan(tmpDir);
-      const criticalCount = result.counts.critical;
-      expect(criticalCount).toBeGreaterThan(0);
-      expect(result.score).toBeLessThan(100);
+      expect(result.counts.critical).toBeGreaterThan(0);
     });
 
     it("sorts findings by severity (critical first)", () => {
@@ -226,20 +222,6 @@ describe("scan", () => {
           expect(criticalIdx).toBeLessThan(warningIdx);
         }
       }
-    });
-
-    it("never goes below 0", () => {
-      writeFile(tmpDir, "package.json", JSON.stringify({
-        dependencies: { next: "^15.0.0" },
-      }));
-      writeFile(tmpDir, "app/api/a/route.ts", "export async function GET() {}");
-      writeFile(tmpDir, "app/api/b/route.ts", "export async function POST() {}");
-      writeFile(tmpDir, ".env", "SECRET_KEY=abc\nDATABASE_URL=postgres://x\nAPI_KEY=y");
-      writeFile(tmpDir, "public/img.png", "x");
-      writeFile(tmpDir, "app/page.tsx", "const x = process.env.FEATURE_X;");
-
-      const result = scan(tmpDir);
-      expect(result.score).toBeGreaterThanOrEqual(0);
     });
   });
 });

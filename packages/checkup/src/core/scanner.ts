@@ -35,8 +35,6 @@ export interface ScanResult {
   counts: Record<Severity, number>;
   /** All findings */
   findings: Finding[];
-  /** Overall readiness score 0-100 */
-  score: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -373,7 +371,6 @@ export function scan(projectDir: string): ScanResult {
       total: 0,
       counts: { critical: 0, warning: 0, info: 0 },
       findings: [],
-      score: 0,
     };
   }
 
@@ -390,18 +387,10 @@ export function scan(projectDir: string): ScanResult {
   const counts: Record<Severity, number> = { critical: 0, warning: 0, info: 0 };
   for (const f of findings) counts[f.severity]++;
 
-  // Score: start at 100, deduct per finding by severity
-  const deductions: Record<Severity, number> = { critical: 20, warning: 10, info: 5 };
-  const score = Math.max(
-    0,
-    100 - findings.reduce((acc, f) => acc + deductions[f.severity], 0),
-  );
-
   return {
     projectDir,
     total: findings.length,
     counts,
     findings,
-    score,
   };
 }
