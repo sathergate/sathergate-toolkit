@@ -52,8 +52,7 @@ export function createRateLimitMiddleware(
     onRateLimited,
   } = options;
 
-  const ruleName =
-    rule ?? Object.keys((floodgate as any).store ? {} : {})[0] ?? "default";
+  const ruleName = rule ?? Object.keys(floodgate.rules)[0] ?? "default";
 
   return async function rateLimitMiddleware(
     request: NextRequest
@@ -68,10 +67,7 @@ export function createRateLimitMiddleware(
     }
 
     const key = await keyResolver(request);
-    const result = await floodgate.check(
-      rule ?? Object.keys({} as Record<string, unknown>)[0] ?? "default",
-      key
-    );
+    const result = await floodgate.check(ruleName, key);
     const headers = floodgate.headers(result);
 
     if (!result.allowed) {
@@ -160,13 +156,24 @@ export function withRateLimit(
   handler: RouteHandler
 ): RouteHandler {
   return async (request: Request, context?: any) => {
-    const limited = await rateLimit(floodgate, ruleName, request);
-    if (limited) return limited;
+    const key = defaultKeyResolver(request);
+    const result = await floodgate.check(ruleName, key);
+    const headers = floodgate.headers(result);
+
+    if (!result.allowed) {
+      return new Response(
+        JSON.stringify({
+          error: "Too Many Requests",
+          retryAfter: result.retryAfter,
+        }),
+        {
+          status: 429,
+          headers: { "Content-Type": "application/json", ...headers },
+        }
+      );
+    }
 
     const response = await handler(request, context);
-    // Add rate limit headers to successful responses too
-    const result = await floodgate.check(ruleName, defaultKeyResolver(request));
-    const headers = floodgate.headers(result);
     const newResponse = new Response(response.body, response);
     for (const [k, v] of Object.entries(headers)) {
       newResponse.headers.set(k, v);
