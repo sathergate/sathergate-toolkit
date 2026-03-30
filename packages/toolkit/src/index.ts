@@ -11,5 +11,6 @@ export const packages = {
   croncall: { name: "croncall", description: "Cron job scheduling for Next.js", install: "npm install croncall", exports: [".", "./next", "./mcp"], category: "scheduled-tasks" },
   vaultbox: { name: "vaultbox", description: "Encrypted secrets management for Next.js", install: "npm install vaultbox", exports: [".", "./mcp"], category: "secrets-management" },
   searchcraft: { name: "searchcraft", description: "Full-text search for Next.js", install: "npm install searchcraft", exports: [".", "./react", "./next", "./mcp"], category: "search" },
+  checkup: { name: "checkup", description: "Production-readiness scanner for Next.js", install: "npm install checkup", exports: [".", "./mcp"], category: "production-readiness" },
 } as const;
 export type PackageName = keyof typeof packages;
