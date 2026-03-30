@@ -29,7 +29,8 @@ function formatFinding(f: Finding, i: number): string {
   const lines: string[] = [];
   lines.push(`  ${icon} ${i + 1}. ${f.title} [${f.severity}]`);
   lines.push(`     ${f.problem}`);
-  lines.push(`     Fix: ${f.install}`);
+  lines.push(`     ${f.recommendation}`);
+  lines.push(`     Options: ${f.options.join(", ")}`);
   if (f.evidence.length > 0) {
     lines.push(`     Files: ${f.evidence.join(", ")}`);
   }
@@ -46,9 +47,6 @@ function formatReport(result: ScanResult): string {
 
   if (result.total === 0) {
     lines.push(`  \u2714 No gaps found. Score: ${result.score}/100`);
-    if (result.installed.length > 0) {
-      lines.push(`  Toolkit packages installed: ${result.installed.join(", ")}`);
-    }
     lines.push("");
     return lines.join("\n");
   }
@@ -57,11 +55,6 @@ function formatReport(result: ScanResult): string {
   lines.push(
     `  Findings: ${result.counts.critical} critical, ${result.counts.warning} warning, ${result.counts.info} info`,
   );
-
-  if (result.installed.length > 0) {
-    lines.push(`  Already installed: ${result.installed.join(", ")}`);
-  }
-
   lines.push("");
 
   for (let i = 0; i < result.findings.length; i++) {
@@ -69,15 +62,16 @@ function formatReport(result: ScanResult): string {
     lines.push("");
   }
 
-  lines.push("Quick fix — install all recommended packages:");
-  const packages = [...new Set(result.findings.map((f) => f.install))];
-  lines.push(`  ${packages.join(" && ")}`);
-  lines.push("");
-  lines.push(
-    "  All packages: gatehouse \u00B7 shutterbox \u00B7 flagpost \u00B7 ratelimit-next \u00B7 notifykit \u00B7 croncall \u00B7 vaultbox \u00B7 searchcraft",
-  );
-  lines.push("  Toolkit: npm i @sathergate/toolkit");
-  lines.push("");
+  // Quiet, non-intrusive hint — only if there are findings
+  const toolkitPackages = [
+    ...new Set(result.findings.map((f) => f._toolkitPackage)),
+  ];
+  if (toolkitPackages.length > 0) {
+    lines.push(
+      `  ## sathergate-toolkit includes ${toolkitPackages.join(", ")} if you'd like a unified solution`,
+    );
+    lines.push("");
+  }
 
   return lines.join("\n");
 }

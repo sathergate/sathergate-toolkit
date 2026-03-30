@@ -51,8 +51,6 @@ describe("scan", () => {
     const result = scan(tmpDir);
     expect(result.total).toBe(0);
     expect(result.score).toBe(100);
-    expect(result.installed).toContain("gatehouse");
-    expect(result.installed).toContain("ratelimit-next");
   });
 
   describe("rate limiting check", () => {
@@ -67,7 +65,7 @@ describe("scan", () => {
       const finding = result.findings.find((f) => f.check === "rate-limiting");
       expect(finding).toBeDefined();
       expect(finding!.severity).toBe("critical");
-      expect(finding!.package).toBe("ratelimit-next");
+      expect(finding!.options.length).toBeGreaterThan(1);
       expect(finding!.evidence.length).toBeGreaterThan(0);
     });
 
@@ -80,6 +78,16 @@ describe("scan", () => {
       const result = scan(tmpDir);
       const finding = result.findings.find((f) => f.check === "rate-limiting");
       expect(finding).toBeUndefined();
+    });
+
+    it("skips when a third-party rate limiter is installed", () => {
+      writeFile(tmpDir, "package.json", JSON.stringify({
+        dependencies: { next: "^15.0.0", "@upstash/ratelimit": "^1.0.0" },
+      }));
+      writeFile(tmpDir, "app/api/users/route.ts", "export async function GET() {}");
+
+      const result = scan(tmpDir);
+      expect(result.findings.find((f) => f.check === "rate-limiting")).toBeUndefined();
     });
   });
 
@@ -94,12 +102,21 @@ describe("scan", () => {
       const finding = result.findings.find((f) => f.check === "authorization");
       expect(finding).toBeDefined();
       expect(finding!.severity).toBe("critical");
-      expect(finding!.package).toBe("gatehouse");
     });
 
     it("skips when gatehouse is installed", () => {
       writeFile(tmpDir, "package.json", JSON.stringify({
         dependencies: { next: "^15.0.0", gatehouse: "^0.1.0" },
+      }));
+      writeFile(tmpDir, "app/api/admin/route.ts", "export async function DELETE() {}");
+
+      const result = scan(tmpDir);
+      expect(result.findings.find((f) => f.check === "authorization")).toBeUndefined();
+    });
+
+    it("skips when casl is installed", () => {
+      writeFile(tmpDir, "package.json", JSON.stringify({
+        dependencies: { next: "^15.0.0", casl: "^6.0.0" },
       }));
       writeFile(tmpDir, "app/api/admin/route.ts", "export async function DELETE() {}");
 
@@ -119,7 +136,6 @@ describe("scan", () => {
       const finding = result.findings.find((f) => f.check === "secrets");
       expect(finding).toBeDefined();
       expect(finding!.severity).toBe("critical");
-      expect(finding!.package).toBe("vaultbox");
     });
 
     it("skips when vaultbox is installed", () => {
@@ -144,7 +160,6 @@ describe("scan", () => {
       const finding = result.findings.find((f) => f.check === "feature-flags");
       expect(finding).toBeDefined();
       expect(finding!.severity).toBe("warning");
-      expect(finding!.package).toBe("flagpost");
     });
   });
 
@@ -160,7 +175,23 @@ describe("scan", () => {
       const finding = result.findings.find((f) => f.check === "image-optimization");
       expect(finding).toBeDefined();
       expect(finding!.severity).toBe("warning");
-      expect(finding!.package).toBe("shutterbox");
+    });
+  });
+
+  describe("findings are vendor-neutral", () => {
+    it("lists multiple options including non-toolkit solutions", () => {
+      writeFile(tmpDir, "package.json", JSON.stringify({
+        dependencies: { next: "^15.0.0" },
+      }));
+      writeFile(tmpDir, "app/api/route.ts", "export async function GET() {}");
+
+      const result = scan(tmpDir);
+      for (const finding of result.findings) {
+        // Every finding should list more than just the toolkit package
+        expect(finding.options.length).toBeGreaterThanOrEqual(2);
+        // The recommendation should not mention sathergate or toolkit
+        expect(finding.recommendation).not.toMatch(/sathergate/i);
+      }
     });
   });
 
@@ -175,7 +206,6 @@ describe("scan", () => {
       const result = scan(tmpDir);
       const criticalCount = result.counts.critical;
       expect(criticalCount).toBeGreaterThan(0);
-      // Score should be 100 minus deductions
       expect(result.score).toBeLessThan(100);
     });
 
@@ -202,7 +232,6 @@ describe("scan", () => {
       writeFile(tmpDir, "package.json", JSON.stringify({
         dependencies: { next: "^15.0.0" },
       }));
-      // Create enough findings to theoretically exceed 100 points of deductions
       writeFile(tmpDir, "app/api/a/route.ts", "export async function GET() {}");
       writeFile(tmpDir, "app/api/b/route.ts", "export async function POST() {}");
       writeFile(tmpDir, ".env", "SECRET_KEY=abc\nDATABASE_URL=postgres://x\nAPI_KEY=y");
