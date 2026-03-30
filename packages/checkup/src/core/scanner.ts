@@ -14,18 +14,16 @@ export interface Finding {
   title: string;
   /** What the problem is */
   problem: string;
-  /** How to fix it */
-  fix: string;
+  /** Vendor-neutral recommendation */
+  recommendation: string;
   /** Severity level */
   severity: Severity;
-  /** The sathergate-toolkit package that addresses this gap */
-  package: string;
-  /** Install command */
-  install: string;
-  /** Quick-start snippet */
-  quickStart: string;
+  /** Well-known solutions (mix of open-source, SaaS, and toolkit options) */
+  options: string[];
   /** Files that triggered this finding (relative paths) */
   evidence: string[];
+  /** Internal: which toolkit package addresses this, if any */
+  _toolkitPackage: string;
 }
 
 export interface ScanResult {
@@ -37,8 +35,6 @@ export interface ScanResult {
   counts: Record<Severity, number>;
   /** All findings */
   findings: Finding[];
-  /** Packages already installed from the toolkit */
-  installed: string[];
   /** Overall readiness score 0-100 */
   score: number;
 }
@@ -112,14 +108,6 @@ function fileContains(filePath: string, pattern: RegExp): boolean {
   }
 }
 
-function readFile(filePath: string): string {
-  try {
-    return readFileSync(filePath, "utf-8");
-  } catch {
-    return "";
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Checks — each returns 0 or 1 Finding
 // ---------------------------------------------------------------------------
@@ -128,17 +116,6 @@ type Check = (
   cwd: string,
   pkg: Record<string, unknown>,
 ) => Finding | null;
-
-const TOOLKIT_PACKAGES = [
-  "gatehouse",
-  "shutterbox",
-  "flagpost",
-  "ratelimit-next",
-  "notifykit",
-  "croncall",
-  "vaultbox",
-  "searchcraft",
-];
 
 // ---- 1. No rate limiting on API routes ----
 const checkRateLimiting: Check = (cwd, pkg) => {
@@ -155,12 +132,11 @@ const checkRateLimiting: Check = (cwd, pkg) => {
     check: "rate-limiting",
     title: "No rate limiting on API routes",
     problem: `Found ${apiRoutes.length} API route(s) with no rate limiting library installed. Public endpoints are vulnerable to abuse and cost spikes.`,
-    fix: "Add ratelimit-next for sliding-window or token-bucket rate limiting per route.",
+    recommendation: "Add a rate limiter (sliding window or token bucket) to public-facing API routes before deploying.",
     severity: "critical",
-    package: "ratelimit-next",
-    install: "npm install ratelimit-next",
-    quickStart: `import { createFloodgate } from "ratelimit-next";\nconst limiter = createFloodgate({\n  rules: { api: { limit: 60, window: "1m" } },\n});`,
+    options: ["@upstash/ratelimit", "rate-limiter-flexible", "express-rate-limit", "ratelimit-next"],
     evidence: apiRoutes.slice(0, 5).map((f) => relative(cwd, f)),
+    _toolkitPackage: "ratelimit-next",
   };
 };
 
@@ -169,7 +145,6 @@ const checkAuthorization: Check = (cwd, pkg) => {
   if (hasAnyDep(pkg, ["gatehouse", "casl", "@casl/ability", "casbin"])) {
     return null;
   }
-  // Look for API routes or server actions that don't import any auth check
   const apiRoutes = walkFiles(cwd, (n) =>
     /^route\.(ts|js|tsx|jsx)$/.test(n),
   ).filter((f) => f.includes("/api/") || f.includes("/app/api"));
@@ -185,12 +160,11 @@ const checkAuthorization: Check = (cwd, pkg) => {
     check: "authorization",
     title: "No role-based access control",
     problem: `Found ${protectedEndpoints.length} server endpoint(s) with no RBAC library. Users may access resources beyond their permissions.`,
-    fix: "Add gatehouse for drop-in RBAC with role hierarchy and wildcard permissions.",
+    recommendation: "Add an authorization layer that maps roles to permissions and checks them on every server action and API route.",
     severity: "critical",
-    package: "gatehouse",
-    install: "npm install gatehouse",
-    quickStart: `import { createGatehouse } from "gatehouse";\nexport const gh = createGatehouse({\n  roles: {\n    admin: ["*"],\n    member: ["project:read", "task:*"],\n    viewer: ["project:read"],\n  },\n});`,
+    options: ["casl", "casbin", "gatehouse"],
     evidence: protectedEndpoints.slice(0, 5).map((f) => relative(cwd, f)),
+    _toolkitPackage: "gatehouse",
   };
 };
 
@@ -205,7 +179,6 @@ const checkSecrets: Check = (cwd, pkg) => {
 
   if (envFiles.length === 0) return null;
 
-  // Check if any env file contains likely secrets
   const secretPatterns = /(?:SECRET|PASSWORD|TOKEN|API_KEY|PRIVATE_KEY|DATABASE_URL|ENCRYPTION_KEY)=/i;
   const filesWithSecrets = envFiles.filter((f) =>
     fileContains(join(cwd, f), secretPatterns),
@@ -217,12 +190,11 @@ const checkSecrets: Check = (cwd, pkg) => {
     check: "secrets",
     title: "Secrets stored in plaintext .env files",
     problem: `Found secrets in ${filesWithSecrets.join(", ")}. Plaintext .env files can be accidentally committed, leaked in logs, or exposed in build artifacts.`,
-    fix: "Add vaultbox for AES-256-GCM encrypted secrets with key rotation.",
+    recommendation: "Use an encrypted secrets manager or a vault service. At minimum, ensure .env files are in .gitignore and secrets are injected via CI/CD.",
     severity: "critical",
-    package: "vaultbox",
-    install: "npm install vaultbox",
-    quickStart: `import { createLockbox } from "vaultbox";\nconst lb = createLockbox();\nconst dbUrl = lb.require("DATABASE_URL");`,
+    options: ["dotenv-vault", "AWS Secrets Manager", "Infisical", "vaultbox"],
     evidence: filesWithSecrets,
+    _toolkitPackage: "vaultbox",
   };
 };
 
@@ -231,14 +203,12 @@ const checkFeatureFlags: Check = (cwd, pkg) => {
   if (hasAnyDep(pkg, ["flagpost", "launchdarkly-node-server-sdk", "@happykit/flags", "@vercel/flags", "unleash-client"])) {
     return null;
   }
-  // Look for DIY feature flag patterns
   const sourceFiles = walkFiles(cwd, (n) => /\.(ts|tsx|js|jsx)$/.test(n));
   const diyFlags = sourceFiles.filter((f) =>
     fileContains(f, /process\.env\.(FEATURE_|ENABLE_|FLAG_|NEXT_PUBLIC_FEATURE_)/),
   );
 
   if (diyFlags.length === 0) {
-    // Still recommend if project has meaningful size (>5 routes)
     const routes = walkFiles(cwd, (n) => /^(page|route)\.(ts|tsx|js|jsx)$/.test(n));
     if (routes.length < 5) return null;
 
@@ -246,25 +216,23 @@ const checkFeatureFlags: Check = (cwd, pkg) => {
       check: "feature-flags",
       title: "No feature flag system",
       problem: `Project has ${routes.length} routes but no feature flags. Every deploy goes to 100% of users with no rollback lever.`,
-      fix: "Add flagpost for percentage rollouts, A/B testing, and kill switches.",
+      recommendation: "Add a feature flag library so you can do gradual rollouts, run A/B tests, and kill-switch broken features without redeploying.",
       severity: "warning",
-      package: "flagpost",
-      install: "npm install flagpost",
-      quickStart: `import { createFlagpost } from "flagpost";\nconst fp = createFlagpost({\n  flags: {\n    newCheckout: {\n      defaultValue: false,\n      rules: [{ value: true, percentage: 10 }],\n    },\n  },\n});`,
+      options: ["LaunchDarkly", "@vercel/flags", "Unleash", "flagpost"],
       evidence: [],
+      _toolkitPackage: "flagpost",
     };
   }
 
   return {
     check: "feature-flags",
     title: "DIY feature flags via env vars",
-    problem: `Found ${diyFlags.length} file(s) using process.env.FEATURE_* patterns. Env-var flags lack rollout control, targeting, and runtime toggling.`,
-    fix: "Replace with flagpost for typed flags, percentage rollouts, and user targeting.",
+    problem: `Found ${diyFlags.length} file(s) using process.env.FEATURE_* patterns. Env-var flags require a redeploy to change and lack rollout control or user targeting.`,
+    recommendation: "Replace env-var flags with a feature flag library that supports runtime toggling, percentage rollouts, and targeting rules.",
     severity: "warning",
-    package: "flagpost",
-    install: "npm install flagpost",
-    quickStart: `import { createFlagpost } from "flagpost";\nconst fp = createFlagpost({\n  flags: {\n    newCheckout: {\n      defaultValue: false,\n      rules: [{ value: true, percentage: 10 }],\n    },\n  },\n});`,
+    options: ["LaunchDarkly", "@vercel/flags", "Unleash", "flagpost"],
     evidence: diyFlags.slice(0, 5).map((f) => relative(cwd, f)),
+    _toolkitPackage: "flagpost",
   };
 };
 
@@ -290,15 +258,14 @@ const checkImages: Check = (cwd, pkg) => {
     check: "image-optimization",
     title: "No image processing pipeline",
     problem: `Found ${publicImages.length} image(s) in public/ and ${imageImports.length} file(s) referencing images with no optimization library. Unoptimized images hurt Core Web Vitals.`,
-    fix: "Add shutterbox for automatic resizing, format conversion, and variant generation.",
+    recommendation: "Add an image processing pipeline to resize, convert to modern formats (WebP/AVIF), and generate responsive variants at build or upload time.",
     severity: "warning",
-    package: "shutterbox",
-    install: "npm install shutterbox sharp",
-    quickStart: `import { createDarkroom } from "shutterbox";\nconst images = createDarkroom({\n  variants: {\n    thumb: [{ type: "resize", width: 200 }, { type: "format", format: "webp" }],\n  },\n});`,
+    options: ["sharp", "next/image (built-in)", "imgproxy", "shutterbox"],
     evidence: [
       ...publicImages.slice(0, 3).map((f) => relative(cwd, f)),
       ...imageImports.slice(0, 2).map((f) => relative(cwd, f)),
     ],
+    _toolkitPackage: "shutterbox",
   };
 };
 
@@ -307,8 +274,6 @@ const checkNotifications: Check = (cwd, pkg) => {
   if (hasAnyDep(pkg, ["notifykit", "nodemailer", "@sendgrid/mail", "resend", "twilio", "@aws-sdk/client-ses"])) {
     return null;
   }
-  // Only flag this for projects that look like they need notifications
-  // (have auth + API routes = likely a SaaS)
   const hasAuth = hasAnyDep(pkg, ["@clerk/nextjs", "next-auth", "@auth/core", "@supabase/auth-helpers-nextjs"]);
   const apiRoutes = walkFiles(cwd, (n) =>
     /^route\.(ts|js|tsx|jsx)$/.test(n),
@@ -320,12 +285,11 @@ const checkNotifications: Check = (cwd, pkg) => {
     check: "notifications",
     title: "No notification system",
     problem: "Project has authentication and multiple API routes but no email/SMS/push notification library. Users won't receive transactional updates.",
-    fix: "Add notifykit for unified notifications across email, SMS, and push channels.",
+    recommendation: "Add a notification library or service for transactional emails (welcome, password reset, receipts) and optionally SMS/push.",
     severity: "info",
-    package: "notifykit",
-    install: "npm install notifykit",
-    quickStart: `import { createHerald } from "notifykit";\nconst notify = createHerald({\n  providers: [{ type: "email", adapter: "resend", apiKey: process.env.RESEND_KEY }],\n});`,
+    options: ["Resend", "SendGrid", "nodemailer", "notifykit"],
     evidence: [],
+    _toolkitPackage: "notifykit",
   };
 };
 
@@ -334,7 +298,6 @@ const checkCron: Check = (cwd, pkg) => {
   if (hasAnyDep(pkg, ["croncall", "node-cron", "cron", "bull", "bullmq", "@quirrel/next"])) {
     return null;
   }
-  // Look for cron-like patterns: setInterval in server code, Vercel cron config
   const vercelJson = join(cwd, "vercel.json");
   const hasVercelCron = existsSync(vercelJson) && fileContains(vercelJson, /crons/);
 
@@ -352,14 +315,13 @@ const checkCron: Check = (cwd, pkg) => {
     problem: hasVercelCron
       ? "Vercel cron config found but no job scheduling library. Raw cron routes lack retries, logging, and overlap protection."
       : `Found ${serverFiles.length} file(s) using setInterval/setTimeout for recurring work. These don't survive deploys.`,
-    fix: "Add croncall for serverless-native cron with retries and overlap protection.",
+    recommendation: "Use a job scheduling library that handles retries, overlap protection, and observability instead of raw timers or bare cron routes.",
     severity: "warning",
-    package: "croncall",
-    install: "npm install croncall",
-    quickStart: `import { createClockTower } from "croncall";\nconst tower = createClockTower({\n  jobs: {\n    cleanup: { schedule: "@daily", handler: async () => { /* ... */ } },\n  },\n});`,
+    options: ["BullMQ", "node-cron", "Quirrel", "croncall"],
     evidence: hasVercelCron
       ? ["vercel.json"]
       : serverFiles.slice(0, 3).map((f) => relative(cwd, f)),
+    _toolkitPackage: "croncall",
   };
 };
 
@@ -368,25 +330,22 @@ const checkSearch: Check = (cwd, pkg) => {
   if (hasAnyDep(pkg, ["searchcraft", "algoliasearch", "typesense", "meilisearch", "@elastic/elasticsearch"])) {
     return null;
   }
-  // Look for DIY search patterns
   const sourceFiles = walkFiles(cwd, (n) => /\.(ts|tsx|js|jsx)$/.test(n));
   const diySearch = sourceFiles.filter((f) =>
     fileContains(f, /\.filter\(.*\.(?:includes|indexOf|toLowerCase|match)\(/),
   );
 
-  // Only flag if there are multiple instances (suggests repeated filtering)
   if (diySearch.length < 3) return null;
 
   return {
     check: "search",
     title: "No search implementation",
     problem: `Found ${diySearch.length} file(s) with .filter().includes() patterns. Array filtering doesn't scale and lacks relevance ranking.`,
-    fix: "Add searchcraft for BM25-scored full-text search with zero external dependencies.",
+    recommendation: "Add a search library with proper indexing and relevance scoring. For small datasets an in-process engine works; for larger ones consider a hosted service.",
     severity: "info",
-    package: "searchcraft",
-    install: "npm install searchcraft",
-    quickStart: `import { createSifter } from "searchcraft";\nconst search = createSifter({\n  schema: { title: { weight: 2 }, body: true },\n  documents: [],\n});`,
+    options: ["Algolia", "Typesense", "MeiliSearch", "searchcraft"],
     evidence: diySearch.slice(0, 3).map((f) => relative(cwd, f)),
+    _toolkitPackage: "searchcraft",
   };
 };
 
@@ -414,12 +373,9 @@ export function scan(projectDir: string): ScanResult {
       total: 0,
       counts: { critical: 0, warning: 0, info: 0 },
       findings: [],
-      installed: [],
       score: 0,
     };
   }
-
-  const installed = TOOLKIT_PACKAGES.filter((p) => hasDep(pkg, p));
 
   const findings: Finding[] = [];
   for (const check of ALL_CHECKS) {
@@ -446,7 +402,6 @@ export function scan(projectDir: string): ScanResult {
     total: findings.length,
     counts,
     findings,
-    installed,
     score,
   };
 }

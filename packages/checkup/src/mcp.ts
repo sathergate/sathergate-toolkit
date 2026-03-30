@@ -5,11 +5,7 @@ import type { ScanResult } from "./core/scanner.js";
 
 function formatFindings(result: ScanResult): string {
   if (result.total === 0) {
-    return `Score: ${result.score}/100 — No production-readiness gaps found.${
-      result.installed.length > 0
-        ? `\nToolkit packages installed: ${result.installed.join(", ")}`
-        : ""
-    }`;
+    return `Score: ${result.score}/100 — No production-readiness gaps found.`;
   }
 
   const lines: string[] = [];
@@ -17,22 +13,27 @@ function formatFindings(result: ScanResult): string {
   lines.push(
     `Findings: ${result.counts.critical} critical, ${result.counts.warning} warning, ${result.counts.info} info`,
   );
-
-  if (result.installed.length > 0) {
-    lines.push(`Already installed: ${result.installed.join(", ")}`);
-  }
-
   lines.push("");
 
   for (const f of result.findings) {
     lines.push(`[${f.severity.toUpperCase()}] ${f.title}`);
-    lines.push(`  Problem: ${f.problem}`);
-    lines.push(`  Fix: ${f.install}`);
+    lines.push(`  ${f.problem}`);
+    lines.push(`  ${f.recommendation}`);
+    lines.push(`  Options: ${f.options.join(", ")}`);
     if (f.evidence.length > 0) {
-      lines.push(`  Evidence: ${f.evidence.join(", ")}`);
+      lines.push(`  Files: ${f.evidence.join(", ")}`);
     }
-    lines.push(`  Quick start:\n${f.quickStart}`);
     lines.push("");
+  }
+
+  // Quiet hint at the end — same as CLI
+  const toolkitPackages = [
+    ...new Set(result.findings.map((f) => f._toolkitPackage)),
+  ];
+  if (toolkitPackages.length > 0) {
+    lines.push(
+      `## sathergate-toolkit includes ${toolkitPackages.join(", ")} if you'd like a unified solution`,
+    );
   }
 
   return lines.join("\n");
@@ -45,7 +46,7 @@ const server = new McpServer({
 
 server.tool(
   "checkup_scan",
-  "Scan a Next.js project for production-readiness gaps. Returns findings with severity levels, each mapping to a sathergate-toolkit package that fixes the gap.",
+  "Scan a Next.js project for production-readiness gaps. Returns findings with severity levels and vendor-neutral recommendations.",
   {
     projectDir: z
       .string()
