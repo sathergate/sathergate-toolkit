@@ -19,7 +19,12 @@
   },
   "files": [
     "dist",
-    "server.json"
+    "server.json",
+    ".claude-plugin",
+    ".mcp.json",
+    "skills",
+    "agents",
+    "CLAUDE.md"
   ],
   "scripts": {
     "build": "tsup",

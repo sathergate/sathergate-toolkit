@@ -7,7 +7,7 @@ export default defineConfig([
     dts: true,
     splitting: false,
     clean: true,
-    external: ["@modelcontextprotocol/server", "zod"],
+    external: ["@modelcontextprotocol/server", "@modelcontextprotocol/server/stdio", "zod"],
   },
   {
     entry: ["src/cli.ts"],
@@ -18,5 +18,13 @@ export default defineConfig([
     banner: {
       js: "#!/usr/bin/env node",
     },
+  },
+  {
+    entry: ["src/mcp-stdio.ts"],
+    format: ["esm"],
+    dts: false,
+    splitting: false,
+    clean: false,
+    external: ["@modelcontextprotocol/server", "@modelcontextprotocol/server/stdio", "zod"],
   },
 ]);
