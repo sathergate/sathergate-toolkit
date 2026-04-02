@@ -1,0 +1,49 @@
+name: Deploy Sites
+
+on:
+  push:
+    branches: [main]
+    paths: [sites/**]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-sites-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy ${{ matrix.site }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - site: vaultbox-site
+            project: vaultbox-site
+          - site: searchcraft-site
+            project: searchcraft-site
+          - site: croncall-site
+            project: croncall-site
+          - site: flagpost-site
+            project: flagpost-site
+          - site: notifykit-site
+            project: notifykit-site
+          - site: shutterbox-site
+            project: shutterbox-site
+          - site: ratelimit-site
+            project: ratelimit-site
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Deploy to Vercel
+        run: >
+          vercel deploy
+          --prod
+          --token=${{ secrets.VERCEL_TOKEN }}
+          --name=${{ matrix.project }}
+          --yes
+        working-directory: sites/${{ matrix.site }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
