@@ -1,0 +1,20 @@
+{
+  "name": "checkup",
+  "version": "0.1.0",
+  "description": "Production-readiness scanner for Next.js projects. Finds infrastructure gaps and suggests fixes.",
+  "author": {
+    "name": "sathergate",
+    "url": "https://github.com/sathergate"
+  },
+  "homepage": "https://github.com/sathergate/sathergate-toolkit",
+  "repository": "https://github.com/sathergate/sathergate-toolkit",
+  "license": "MIT",
+  "keywords": [
+    "production-readiness",
+    "nextjs",
+    "scanner",
+    "audit",
+    "hardening",
+    "infrastructure"
+  ]
+}

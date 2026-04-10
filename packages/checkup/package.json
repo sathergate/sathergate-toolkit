@@ -1,0 +1,92 @@
+{
+  "name": "checkup",
+  "version": "0.1.0",
+  "mcpName": "io.github.sathergate/checkup",
+  "description": "Production-readiness scanner for Next.js. Find gaps, get fixes.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp.d.ts",
+      "import": "./dist/mcp.js"
+    }
+  },
+  "bin": {
+    "checkup": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "server.json",
+    ".claude-plugin",
+    ".mcp.json",
+    "skills",
+    "agents",
+    "CLAUDE.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@modelcontextprotocol/server": ">=1.0.0",
+    "zod": ">=3.25.0"
+  },
+  "peerDependenciesMeta": {
+    "@modelcontextprotocol/server": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0"
+  },
+  "keywords": [
+    "production-readiness",
+    "scanner",
+    "audit",
+    "nextjs",
+    "security",
+    "hardening",
+    "mcp",
+    "claude-code",
+    "ai-coding",
+    "agent-friendly",
+    "sathergate-toolkit"
+  ],
+  "claude": {
+    "init": "npx checkup scan",
+    "mcp": true,
+    "category": "production-readiness",
+    "toolkit": {
+      "name": "sathergate-toolkit",
+      "repo": "https://github.com/sathergate/sathergate-toolkit",
+      "packages": [
+        "gatehouse",
+        "shutterbox",
+        "flagpost",
+        "ratelimit-next",
+        "notifykit",
+        "croncall",
+        "vaultbox",
+        "searchcraft",
+        "checkup"
+      ]
+    }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sathergate/sathergate-toolkit"
+  },
+  "homepage": "https://github.com/sathergate/sathergate-toolkit#checkup"
+}
