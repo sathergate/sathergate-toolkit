@@ -72,7 +72,7 @@
     "@aws-sdk/client-sns": "^3.1017.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
-    "next": "^15.0.0",
+    "next": "^15.5.22",
     "react": "^19.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.7.0"
